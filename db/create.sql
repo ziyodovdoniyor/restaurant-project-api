@@ -2,7 +2,7 @@ CREATE TABLE meal(
                        id UUID NOT NULL PRIMARY KEY,
                        name VARCHAR(55) NOT NULL,
                        price INTEGER NOT NULL,
-                       type INTEGER NOT NULL
+                       type INTEGER
 );
 CREATE TABLE salad(
                       id UUID NOT NULL PRIMARY KEY,
