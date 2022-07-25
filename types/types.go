@@ -31,9 +31,7 @@ type Purchase struct {
 	PurchasedAt  time.Time `json:"purchased_at,omitempty"`
 }
 
-type Client struct {
-	ID          string `json:"id,omitempty"`
-	FullName    string `json:"full_name,omitempty"`
-	PhoneNumber string `json:"phone_number,omitempty"`
-	IsAdmin     bool   `json:"is_admin,omitempty"`
+type Table struct {
+	ID     string `json:"id,omitempty"`
+	Number int    `json:"number,omitempty"`
 }
