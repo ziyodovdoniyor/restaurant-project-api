@@ -16,7 +16,7 @@ type Repository interface {
 
 type Handler struct {
 	repo Repository
-	user types.Table
+	table types.Table
 }
 
 
@@ -37,11 +37,31 @@ func (h *Handler) Menu(c *gin.Context) {
 
 
 
+//Name        string    `json:"name,omitempty"`     
+// Category    string    `json:"category,omitempty"`
+// Ingredients string    `json:"ingredients,omitempty"`
+// Price       int       `json:"price,omitempty"`
+
 func NewRouter(repo Repository) *gin.Engine {
 	r := gin.Default()
 	h := Handler{repo: repo}
 	r.GET("/menu", h.Menu)
+	r.GET("/menu/first-meal", )
+	r.GET("/menu/second-meal", )
+	r.GET("/menu/salad", )
+	r.GET("/menu/dessert", )
+	r.GET("/menu/drinks", )
 	
+	r.GET("/table/")
+	r.GET("/table/buy/")
+
+	r.GET("/table/buy/budget/")
+
+	r.POST("/add/food")
+	r.PUT("/add/food/")
+	r.DELETE("/add/food/")
+
+
 
 	return r
 }
