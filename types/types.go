@@ -4,7 +4,7 @@ import "time"
 
 type Food struct {
 	ID          string    `json:"id,omitempty"`
-	Name        string    `json:"name,omitempty"`
+	Name        string    `json:"name,omitempty"`     
 	Category    string    `json:"category,omitempty"`
 	Ingredients string    `json:"ingredients,omitempty"`
 	Price       int       `json:"price,omitempty"`
@@ -32,6 +32,7 @@ type Purchase struct {
 }
 
 type Table struct {
-	ID     string `json:"id,omitempty"`
-	Number int    `json:"number,omitempty"`
+	ID      string `json:"id,omitempty"`
+	Number  int    `json:"number,omitempty"`
+	IsTaken bool   `json:"is_taken,omitempty"`
 }

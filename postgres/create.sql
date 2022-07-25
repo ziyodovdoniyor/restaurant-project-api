@@ -40,7 +40,8 @@ CREATE TABLE beverage (
 
 CREATE TABLE table (
     id UUID PRIMARY KEY,
-    table_number INTEGER
+    table_number INTEGER,
+    is_taken BOOLEAN DEFAULT False
 );
 
 CREATE TABLE purchase (

@@ -13,3 +13,4 @@ func New(number int) *types.Table {
 		Number: number,
 	}
 }
+
