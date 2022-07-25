@@ -38,15 +38,13 @@ CREATE TABLE beverage (
     cooked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE client (
+CREATE TABLE table (
     id UUID PRIMARY KEY,
-    full_name VARCHAR(80),
-    phone_number VARCHAR(50) UNIQUE,
-    is_admin BOOLEAN
+    table_number INTEGER
 );
 
 CREATE TABLE purchase (
-    client_id UUID REFERENCES client (id),
+    table_id UUID REFERENCES client (id),
     first_meal_id UUID REFERENCES first_meal (id),
     second_meal_id UUID REFERENCES second_meal (id),
     dessert_id UUID REFERENCES dessert (id),
