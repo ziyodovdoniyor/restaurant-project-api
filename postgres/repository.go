@@ -17,6 +17,7 @@ func NewPostgresRepository(db *sql.DB) *PostgresRepository {
 	}
 }
 
+// sunbula **************************************************************************************************************
 func (ps *PostgresRepository) Menu() ([]types.Food, error) {
 	tx, err := ps.db.Begin()
 	if err != nil {
@@ -500,3 +501,4 @@ func (ps *PostgresRepository) DeleteFoodByName(foodID, cetegory string) error  {
 
 	return nil
 }
+// sunbula *****************************************************************************************************************
