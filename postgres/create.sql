@@ -38,7 +38,7 @@ CREATE TABLE beverage (
     cooked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE table (
+CREATE TABLE tables (
     id UUID PRIMARY KEY,
     table_number INTEGER,
     is_taken BOOLEAN DEFAULT False
@@ -54,3 +54,12 @@ CREATE TABLE purchase (
     total INTEGER NOT NULL,
     purchased_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- DROP TABLE purchase;
+-- DROP TABLE beverage;
+-- DROP TABLE salad;
+-- DROP TABLE dessert;
+-- DROP TABLE second_meal;
+-- DROP TABLE first_meal;
+
+SELECT * FROM salad;
