@@ -20,6 +20,7 @@ type Repository interface {
 	UpdateFirstMeal(id string, f types.Food) error
 	UpdateBeverageMeal(id string, f types.Food) error
 	GetFood(foods []types.Food, id string) (types.Food, error)
+	DeleteFoodByName(foodID, cetegory string) error 
 }
 
 type Handler struct {
@@ -209,10 +210,46 @@ func (h *Handler) GetFood(c *gin.Context)  {
 	c.JSON(http.StatusOK, WantedFood)
 
 }
-//Name        string    `json:"name,omitempty"`
-// Category    string    `json:"category,omitempty"`
-// Ingredients string    `json:"ingredients,omitempty"`
-// Price       int       `json:"price,omitempty"`
+
+func (h *Handler) DeleteFood(c *gin.Context)  {
+	foodName, ok := c.GetQuery("name")
+	if !ok {
+		c.AbortWithStatusJSON(
+			http.StatusBadRequest,
+			gin.H{
+				"error": fmt.Sprintf("invalid query %v", ok),
+			},
+		)
+		return
+	}
+
+	allFoods, err := h.repo.Menu()
+	if err != nil {
+		c.AbortWithStatusJSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"error": fmt.Sprintf(" DeleteFood(): %v", err),
+			},
+		)
+		return
+	}
+
+	foodID, category := h.repo.GetFoodIDByName(foodName, allFoods)
+	 
+	err = h.repo.DeleteFoodByName(foodID, category)
+	if err != nil {
+		c.AbortWithStatusJSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"error": fmt.Sprintf(" DeleteFood(): %v", err),
+			},
+		)
+		return
+	}
+}
+
+
+
 
 func NewRouter(repo Repository) *gin.Engine {
 	r := gin.Default()
@@ -232,7 +269,7 @@ func NewRouter(repo Repository) *gin.Engine {
 	r.POST("/add/food", h.AddFood)
 	r.GET("/food/", h.GetFood)
 	r.PUT("/update/food/", h.UpdateFood)
-	r.DELETE("/add/food/")
+	r.DELETE("/delete/food/", h.DeleteFood)
 
 	return r
 }
