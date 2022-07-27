@@ -455,3 +455,48 @@ func (ps *PostgresRepository) GetFood(foods []types.Food, id string) (types.Food
 
 	return f, nil
 }
+
+func (ps *PostgresRepository) DeleteFoodByName(foodID, cetegory string) error  {
+	if cetegory == types.FirstMeal {
+		_, err := ps.db.Exec(`
+			DELETE FROM first_meal WHERE id = $1
+		`, foodID)	
+		if err != nil {
+			return err
+		}
+	}
+	if cetegory == types.SecondMeal {
+		_, err := ps.db.Exec(`
+			DELETE FROM second_meal WHERE id = $1
+		`, foodID)	
+		if err != nil {
+			return err
+		}
+	}
+	if cetegory == types.Salad {
+		_, err := ps.db.Exec(`
+			DELETE FROM salad WHERE id = $1
+		`, foodID)	
+		if err != nil {
+			return err
+		}
+	}
+	if cetegory == types.Dessert {
+		_, err := ps.db.Exec(`
+			DELETE FROM dessert WHERE id = $1
+		`, foodID)	
+		if err != nil {
+			return err
+		}
+	}
+	if cetegory == types.Beverage {
+		_, err := ps.db.Exec(`
+			DELETE FROM beverage WHERE id = $1
+		`, foodID)	
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
