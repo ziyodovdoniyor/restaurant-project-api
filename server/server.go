@@ -19,6 +19,7 @@ type Repository interface {
 	UpdateDessertMeal(id string, f types.Food) error
 	UpdateFirstMeal(id string, f types.Food) error
 	UpdateBeverageMeal(id string, f types.Food) error
+	GetFood(foods []types.Food, id string) (types.Food, error)
 }
 
 type Handler struct {
@@ -170,7 +171,42 @@ func (h *Handler) UpdateFood(c *gin.Context)  {
 
 
 func (h *Handler) GetFood(c *gin.Context)  {
-	
+	foodName, ok := c.GetQuery("name")
+	if !ok {
+		c.AbortWithStatusJSON(
+			http.StatusBadRequest,
+			gin.H{
+				"error": fmt.Sprintf("invalid query %v", ok),
+			},
+		)
+		return
+	}
+
+	allFoods, err := h.repo.Menu()
+	if err != nil {
+		c.AbortWithStatusJSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"error": fmt.Sprintf(" Menu(): %v", err),
+			},
+		)
+		return
+	}
+
+	foodID, _ := h.repo.GetFoodIDByName(foodName, allFoods)
+
+	WantedFood, err := h.repo.GetFood(allFoods, foodID)
+	if err != nil {
+		c.AbortWithStatusJSON(
+			http.StatusBadRequest,
+			gin.H{
+				"error": fmt.Sprintf("invalid query %v", ok),
+			},
+		)
+		return
+	}
+
+	c.JSON(http.StatusOK, WantedFood)
 
 }
 //Name        string    `json:"name,omitempty"`
@@ -194,7 +230,7 @@ func NewRouter(repo Repository) *gin.Engine {
 	r.GET("/table/buy/budget/")
 
 	r.POST("/add/food", h.AddFood)
-	r.GET("/food/", )
+	r.GET("/food/", h.GetFood)
 	r.PUT("/update/food/", h.UpdateFood)
 	r.DELETE("/add/food/")
 

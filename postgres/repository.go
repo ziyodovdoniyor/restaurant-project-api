@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"database/sql"
+	"fmt"
 	"restaurant/types"
 	"time"
 )
@@ -184,7 +185,7 @@ func (ps *PostgresRepository) UpdateSecondMeal(id string, f types.Food) error {
 		_, err := tx.Exec(`
 			UPDATE second_meal SET name = $1 WHERE id = $2
 		`, f.Name, id)
-	
+
 		if err != nil {
 			tx.Rollback()
 			return err
@@ -195,7 +196,7 @@ func (ps *PostgresRepository) UpdateSecondMeal(id string, f types.Food) error {
 		_, err := tx.Exec(`
 			UPDATE second_meal SET ingredients = $1 WHERE id = $2
 		`, f.Ingredients, id)
-	
+
 		if err != nil {
 			tx.Rollback()
 			return err
@@ -206,7 +207,7 @@ func (ps *PostgresRepository) UpdateSecondMeal(id string, f types.Food) error {
 		_, err := tx.Exec(`
 			UPDATE second_meal SET price = $1 WHERE id = $2
 		`, f.Price, id)
-	
+
 		if err != nil {
 			tx.Rollback()
 			return err
@@ -214,7 +215,7 @@ func (ps *PostgresRepository) UpdateSecondMeal(id string, f types.Food) error {
 	}
 
 	_, err = tx.Exec(`
-		UPDATE second_meal SET cooked_at SET time = $1 WHERE id = $2
+		UPDATE second_meal SET cooked_at = $1 WHERE id = $2
 	`, time.Now(), id)
 
 	if err != nil {
@@ -237,7 +238,7 @@ func (ps *PostgresRepository) UpdateFirstMeal(id string, f types.Food) error {
 		_, err := tx.Exec(`
 			UPDATE first_meal SET name = $1 WHERE id = $2
 		`, f.Name, id)
-	
+
 		if err != nil {
 			tx.Rollback()
 			return err
@@ -248,7 +249,7 @@ func (ps *PostgresRepository) UpdateFirstMeal(id string, f types.Food) error {
 		_, err := tx.Exec(`
 			UPDATE first_meal SET ingredients = $1 WHERE id = $2
 		`, f.Ingredients, id)
-	
+
 		if err != nil {
 			tx.Rollback()
 			return err
@@ -259,7 +260,7 @@ func (ps *PostgresRepository) UpdateFirstMeal(id string, f types.Food) error {
 		_, err := tx.Exec(`
 			UPDATE first_meal SET price = $1 WHERE id = $2
 		`, f.Price, id)
-	
+
 		if err != nil {
 			tx.Rollback()
 			return err
@@ -267,7 +268,7 @@ func (ps *PostgresRepository) UpdateFirstMeal(id string, f types.Food) error {
 	}
 
 	_, err = tx.Exec(`
-		UPDATE first_meal SET cooked_at SET time = $1 WHERE id = $2
+		UPDATE first_meal SET cooked_at = $1 WHERE id = $2
 	`, time.Now(), id)
 
 	if err != nil {
@@ -290,7 +291,7 @@ func (ps *PostgresRepository) UpdateSaladMeal(id string, f types.Food) error {
 		_, err := tx.Exec(`
 			UPDATE salad SET name = $1 WHERE id = $2
 		`, f.Name, id)
-	
+
 		if err != nil {
 			tx.Rollback()
 			return err
@@ -301,7 +302,7 @@ func (ps *PostgresRepository) UpdateSaladMeal(id string, f types.Food) error {
 		_, err := tx.Exec(`
 			UPDATE salad SET ingredients = $1 WHERE id = $2
 		`, f.Ingredients, id)
-	
+
 		if err != nil {
 			tx.Rollback()
 			return err
@@ -312,21 +313,21 @@ func (ps *PostgresRepository) UpdateSaladMeal(id string, f types.Food) error {
 		_, err := tx.Exec(`
 			UPDATE salad SET price = $1 WHERE id = $2
 		`, f.Price, id)
-	
+
 		if err != nil {
 			tx.Rollback()
 			return err
 		}
 	}
 
-	// _, err = tx.Exec(`
-	// 	UPDATE salad SET cooked_at SET time = $1 WHERE id = $2
-	// `, time.Now(), id)
+	_, err = tx.Exec(`
+		UPDATE salad SET cooked_at = $1 WHERE id = $2
+	`, time.Now(), id)
 
-	// if err != nil {
-	// 	tx.Rollback()
-	// 	return err
-	// }
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
 
 	tx.Commit()
 	return nil
@@ -343,7 +344,7 @@ func (ps *PostgresRepository) UpdateDessertMeal(id string, f types.Food) error {
 		_, err := tx.Exec(`
 			UPDATE dessert SET name = $1 WHERE id = $2
 		`, f.Name, id)
-	
+
 		if err != nil {
 			tx.Rollback()
 			return err
@@ -354,7 +355,7 @@ func (ps *PostgresRepository) UpdateDessertMeal(id string, f types.Food) error {
 		_, err := tx.Exec(`
 			UPDATE dessert SET ingredients = $1 WHERE id = $2
 		`, f.Ingredients, id)
-	
+
 		if err != nil {
 			tx.Rollback()
 			return err
@@ -365,7 +366,7 @@ func (ps *PostgresRepository) UpdateDessertMeal(id string, f types.Food) error {
 		_, err := tx.Exec(`
 			UPDATE dessert SET price = $1 WHERE id = $2
 		`, f.Price, id)
-	
+
 		if err != nil {
 			tx.Rollback()
 			return err
@@ -373,7 +374,7 @@ func (ps *PostgresRepository) UpdateDessertMeal(id string, f types.Food) error {
 	}
 
 	_, err = tx.Exec(`
-		UPDATE dessert SET cooked_at SET time = $1 WHERE id = $2
+		UPDATE dessert SET cooked_at = $1 WHERE id = $2
 	`, time.Now(), id)
 
 	if err != nil {
@@ -396,7 +397,7 @@ func (ps *PostgresRepository) UpdateBeverageMeal(id string, f types.Food) error 
 		_, err := tx.Exec(`
 			UPDATE beverage SET name = $1 WHERE id = $2
 		`, f.Name, id)
-	
+
 		if err != nil {
 			tx.Rollback()
 			return err
@@ -407,7 +408,7 @@ func (ps *PostgresRepository) UpdateBeverageMeal(id string, f types.Food) error 
 		_, err := tx.Exec(`
 			UPDATE beverage SET ingredients = $1 WHERE id = $2
 		`, f.Ingredients, id)
-	
+
 		if err != nil {
 			tx.Rollback()
 			return err
@@ -418,7 +419,7 @@ func (ps *PostgresRepository) UpdateBeverageMeal(id string, f types.Food) error 
 		_, err := tx.Exec(`
 			UPDATE beverage SET price = $1 WHERE id = $2
 		`, f.Price, id)
-	
+
 		if err != nil {
 			tx.Rollback()
 			return err
@@ -426,7 +427,7 @@ func (ps *PostgresRepository) UpdateBeverageMeal(id string, f types.Food) error 
 	}
 
 	_, err = tx.Exec(`
-		UPDATE beverage SET cooked_at SET time = $1 WHERE id = $2
+		UPDATE beverage SET cooked_at = $1 WHERE id = $2
 	`, time.Now(), id)
 
 	if err != nil {
@@ -436,4 +437,21 @@ func (ps *PostgresRepository) UpdateBeverageMeal(id string, f types.Food) error 
 
 	tx.Commit()
 	return nil
+}
+
+func (ps *PostgresRepository) GetFood(foods []types.Food, id string) (types.Food, error) {
+	var f types.Food
+	exist := false
+	for _, v := range foods {
+		if id == v.ID {
+			f = v
+			exist = true
+		}
+	}
+
+	if !exist {
+		return types.Food{}, fmt.Errorf("product doesn't exist")
+	}
+
+	return f, nil
 }
