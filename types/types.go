@@ -4,10 +4,11 @@ import "time"
 
 type Food struct {
 	ID          string    `json:"id,omitempty"`
-	Name        string    `json:"name,omitempty"`     
+	Name        string    `json:"name,omitempty"`
 	Category    string    `json:"category,omitempty"`
 	Ingredients string    `json:"ingredients,omitempty"`
-	Price       int       `json:"price,omitempty"`
+	Price       float32   `json:"price,omitempty"`
+	Quantity    int       `json:"quantity,omitempty"`
 	CookedAt    time.Time `json:"cooked_at,omitempty"`
 }
 
