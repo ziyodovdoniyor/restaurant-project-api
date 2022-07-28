@@ -2,7 +2,8 @@ CREATE TABLE first_meal (
     id UUID PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE,
     ingredients TEXT NOT NULL,
-    price INTEGER NOT NULL,
+    price FLOAT NOT NULL,
+    quantity INTEGER, 
     cooked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -10,7 +11,8 @@ CREATE TABLE second_meal (
     id UUID PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE,
     ingredients TEXT NOT NULL,
-    price INTEGER NOT NULL,
+    price FLOAT NOT NULL,
+    quantity INTEGER,
     cooked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -18,7 +20,8 @@ CREATE TABLE dessert (
     id UUID PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE,
     ingredients TEXT NOT NULL,
-    price INTEGER NOT NULL,
+    price FLOAT NOT NULL,
+    quantity INTEGER,
     cooked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -26,7 +29,8 @@ CREATE TABLE salad (
     id UUID PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE,
     ingredients TEXT NOT NULL,
-    price INTEGER NOT NULL,
+    price FLOAT NOT NULL,
+    quantity INTEGER,
     cooked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -34,7 +38,8 @@ CREATE TABLE beverage (
     id UUID PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE,
     ingredients TEXT NOT NULL,
-    price INTEGER NOT NULL,
+    price FLOAT NOT NULL,
+    quantity INTEGER,
     cooked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -43,6 +48,7 @@ CREATE TABLE tables (
     table_number INTEGER,
     is_taken BOOLEAN DEFAULT False
 );
+
 
 CREATE TABLE purchase (
     table_id UUID REFERENCES client (id),
@@ -62,4 +68,4 @@ CREATE TABLE purchase (
 -- DROP TABLE second_meal;
 -- DROP TABLE first_meal;
 
-SELECT * FROM salad;
+-- SELECT * FROM salad;

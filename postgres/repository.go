@@ -33,7 +33,7 @@ func (ps *PostgresRepository) Menu() ([]types.Food, error) {
 	}
 	for rows.Next() {
 		f := types.Food{}
-		err := rows.Scan(&f.ID, &f.Name, &f.Ingredients, &f.Price, &f.CookedAt)
+		err := rows.Scan(&f.ID, &f.Name, &f.Ingredients, &f.Price, &f.Quantity, &f.CookedAt)
 		if err != nil {
 			tx.Rollback()
 			return nil, err
@@ -49,7 +49,7 @@ func (ps *PostgresRepository) Menu() ([]types.Food, error) {
 	}
 	for rows.Next() {
 		f := types.Food{}
-		err := rows.Scan(&f.ID, &f.Name, &f.Ingredients, &f.Price, &f.CookedAt)
+		err := rows.Scan(&f.ID, &f.Name, &f.Ingredients, &f.Price, &f.Quantity, &f.CookedAt)
 		if err != nil {
 			tx.Rollback()
 			return nil, err
@@ -65,7 +65,7 @@ func (ps *PostgresRepository) Menu() ([]types.Food, error) {
 	}
 	for rows.Next() {
 		f := types.Food{}
-		err := rows.Scan(&f.ID, &f.Name, &f.Ingredients, &f.Price, &f.CookedAt)
+		err := rows.Scan(&f.ID, &f.Name, &f.Ingredients, &f.Price, &f.Quantity, &f.CookedAt)
 		if err != nil {
 			tx.Rollback()
 			return nil, err
@@ -81,7 +81,7 @@ func (ps *PostgresRepository) Menu() ([]types.Food, error) {
 	}
 	for rows.Next() {
 		f := types.Food{}
-		err := rows.Scan(&f.ID, &f.Name, &f.Ingredients, &f.Price, &f.CookedAt)
+		err := rows.Scan(&f.ID, &f.Name, &f.Ingredients, &f.Price, &f.Quantity, &f.CookedAt)
 		if err != nil {
 			tx.Rollback()
 			return nil, err
@@ -97,7 +97,7 @@ func (ps *PostgresRepository) Menu() ([]types.Food, error) {
 	}
 	for rows.Next() {
 		f := types.Food{}
-		err := rows.Scan(&f.ID, &f.Name, &f.Ingredients, &f.Price, &f.CookedAt)
+		err := rows.Scan(&f.ID, &f.Name, &f.Ingredients, &f.Price, &f.Quantity, &f.CookedAt)
 		if err != nil {
 			tx.Rollback()
 			return nil, err
@@ -113,45 +113,45 @@ func (ps *PostgresRepository) Menu() ([]types.Food, error) {
 func (ps *PostgresRepository) AddFood(f types.Food) error {
 	if f.Category == types.FirstMeal {
 		_, err := ps.db.Exec(`
-			INSERT INTO first_meal (id, name, ingredients, price, cooked_at)
-			VALUES ($1, $2, $3, $4, $5)
-		`, f.ID, f.Name, f.Ingredients, f.Price, f.CookedAt)
+			INSERT INTO first_meal (id, name, ingredients, price, quantity, cooked_at)
+			VALUES ($1, $2, $3, $4, $5, $6)
+		`, f.ID, f.Name, f.Ingredients, f.Price, f.Quantity, f.CookedAt)
 
 		if err != nil {
 			return err
 		}
 	} else if f.Category == types.SecondMeal {
 		_, err := ps.db.Exec(`
-			INSERT INTO second_meal (id, name, ingredients, price, cooked_at)
-			VALUES ($1, $2, $3, $4, $5)
-		`, f.ID, f.Name, f.Ingredients, f.Price, f.CookedAt)
+			INSERT INTO second_meal (id, name, ingredients, price, qauntity, cooked_at)
+			VALUES ($1, $2, $3, $4, $5, $6)
+		`, f.ID, f.Name, f.Ingredients, f.Price, f.Quantity, f.CookedAt)
 
 		if err != nil {
 			return err
 		}
 	} else if f.Category == types.Salad {
 		_, err := ps.db.Exec(`
-		INSERT INTO salad (id, name, ingredients, price, cooked_at)
-		VALUES ($1, $2, $3, $4, $5)
-	`, f.ID, f.Name, f.Ingredients, f.Price, f.CookedAt)
+		INSERT INTO salad (id, name, ingredients, price, quantity, cooked_at)
+		VALUES ($1, $2, $3, $4, $5, $6)
+	`, f.ID, f.Name, f.Ingredients, f.Price, f.Quantity, f.CookedAt)
 
 		if err != nil {
 			return err
 		}
 	} else if f.Category == types.Dessert {
 		_, err := ps.db.Exec(`
-		INSERT INTO dessert (id, name, ingredients, price, cooked_at)
-		VALUES ($1, $2, $3, $4, $5)
-	`, f.ID, f.Name, f.Ingredients, f.Price, f.CookedAt)
+		INSERT INTO dessert (id, name, ingredients, price, quantity, cooked_at)
+		VALUES ($1, $2, $3, $4, $5, $6)
+	`, f.ID, f.Name, f.Ingredients, f.Price, f.Quantity, f.CookedAt)
 
 		if err != nil {
 			return err
 		}
 	} else if f.Category == types.Beverage {
 		_, err := ps.db.Exec(`
-		INSERT INTO beverage(id, name, ingredients, price, cooked_at)
-		VALUES ($1, $2, $3, $4, $5)
-	`, f.ID, f.Name, f.Ingredients, f.Price, f.CookedAt)
+		INSERT INTO beverage(id, name, ingredients, price, qauntity, cooked_at)
+		VALUES ($1, $2, $3, $4, $5, $6)
+	`, f.ID, f.Name, f.Ingredients, f.Price, f.Quantity, f.CookedAt)
 
 		if err != nil {
 			return err
@@ -215,6 +215,17 @@ func (ps *PostgresRepository) UpdateSecondMeal(id string, f types.Food) error {
 		}
 	}
 
+	if f.Quantity != 0 {
+		_, err := tx.Exec(`
+			UPDATE second_meal SET qauntity = $1 WHERE id = $2
+		`, f.Quantity, id)
+
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
 	_, err = tx.Exec(`
 		UPDATE second_meal SET cooked_at = $1 WHERE id = $2
 	`, time.Now(), id)
@@ -261,6 +272,17 @@ func (ps *PostgresRepository) UpdateFirstMeal(id string, f types.Food) error {
 		_, err := tx.Exec(`
 			UPDATE first_meal SET price = $1 WHERE id = $2
 		`, f.Price, id)
+
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	if f.Quantity != 0 {
+		_, err := tx.Exec(`
+			UPDATE first_meal SET qauntity = $1 WHERE id = $2
+		`, f.Quantity, id)
 
 		if err != nil {
 			tx.Rollback()
@@ -321,6 +343,17 @@ func (ps *PostgresRepository) UpdateSaladMeal(id string, f types.Food) error {
 		}
 	}
 
+	if f.Quantity != 0 {
+		_, err := tx.Exec(`
+			UPDATE salad SET qauntity = $1 WHERE id = $2
+		`, f.Quantity, id)
+
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
 	_, err = tx.Exec(`
 		UPDATE salad SET cooked_at = $1 WHERE id = $2
 	`, time.Now(), id)
@@ -374,6 +407,17 @@ func (ps *PostgresRepository) UpdateDessertMeal(id string, f types.Food) error {
 		}
 	}
 
+	if f.Quantity != 0 {
+		_, err := tx.Exec(`
+			UPDATE dessert SET qauntity = $1 WHERE id = $2
+		`, f.Quantity, id)
+
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
 	_, err = tx.Exec(`
 		UPDATE dessert SET cooked_at = $1 WHERE id = $2
 	`, time.Now(), id)
@@ -420,6 +464,17 @@ func (ps *PostgresRepository) UpdateBeverageMeal(id string, f types.Food) error 
 		_, err := tx.Exec(`
 			UPDATE beverage SET price = $1 WHERE id = $2
 		`, f.Price, id)
+
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	if f.Quantity != 0 {
+		_, err := tx.Exec(`
+			UPDATE beverage SET qauntity = $1 WHERE id = $2
+		`, f.Quantity, id)
 
 		if err != nil {
 			tx.Rollback()
