@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+// PSQL
+
 type PostgresRepository struct {
 	db *sql.DB
 }
@@ -15,6 +17,88 @@ func NewPostgresRepository(db *sql.DB) *PostgresRepository {
 	return &PostgresRepository{
 		db: db,
 	}
+}
+
+func (p PostgresRepository) Buy(purchase *types.Purchase) (int, error) {
+	price := 0
+
+	row, er := p.db.Query("select price from first_meal where id = $1", purchase.FirstMealID)
+	if er != nil {
+		return 0, er
+	}
+	if er = row.Scan(&price); er != nil {
+		return 0, er
+	}
+	purchase.Total += price
+
+	row, er = p.db.Query("select price from second_meal where id = $1", purchase.SecondMealID)
+	if er != nil {
+		return 0, er
+	}
+	if er = row.Scan(&price); er != nil {
+		return 0, er
+	}
+	purchase.Total += price
+
+	row, er = p.db.Query("select price from beverage where id = $1", purchase.BeverageID)
+	if er != nil {
+		return 0, er
+	}
+	if er = row.Scan(&price); er != nil {
+		return 0, er
+	}
+	purchase.Total += price
+
+	row, er = p.db.Query("select price from salad where id = $1", purchase.SaladID)
+	if er != nil {
+		return 0, er
+	}
+	if er = row.Scan(&price); er != nil {
+		return 0, er
+	}
+	purchase.Total += price
+
+	row, er = p.db.Query("select price from dessert where id = $1", purchase.DessertID)
+	if er != nil {
+		return 0, er
+	}
+	if er = row.Scan(&price); er != nil {
+		return 0, er
+	}
+	purchase.Total += price
+
+	return purchase.Total, nil
+}
+
+func (p *PostgresRepository) TakeTable(num int) (types.Table, bool, error) {
+	var t types.Table
+	row := p.db.QueryRow("select table_number, is_taken from tables where table_number = $1", num)
+	if er := row.Scan(&t.Number, &t.IsTaken); er != nil {
+		return types.Table{}, false, er
+	}
+	if t.Number != num {
+		return types.Table{}, true, nil
+	}
+	if _, er := p.db.Exec("update tables set is_taken=$1 where table_number=$2", true, num); er != nil {
+		return types.Table{}, true, er
+	}
+	return t, true, nil
+}
+
+func (p *PostgresRepository) GetTables() ([]int, error) {
+	rows, er := p.db.Query("select table_number from tables where is_taken = $1", false)
+	if er != nil {
+		return nil, er
+	}
+	var tableNumbers []int
+	for rows.Next() {
+		var num int
+		if er = rows.Scan(&num); er != nil {
+			return nil, er
+		}
+		tableNumbers = append(tableNumbers, num)
+	}
+	return tableNumbers, nil
 }
 
 // sunbula **************************************************************************************************************
@@ -512,11 +596,11 @@ func (ps *PostgresRepository) GetFood(foods []types.Food, id string) (types.Food
 	return f, nil
 }
 
-func (ps *PostgresRepository) DeleteFoodByName(foodID, cetegory string) error  {
+func (ps *PostgresRepository) DeleteFoodByName(foodID, cetegory string) error {
 	if cetegory == types.FirstMeal {
 		_, err := ps.db.Exec(`
 			DELETE FROM first_meal WHERE id = $1
-		`, foodID)	
+		`, foodID)
 		if err != nil {
 			return err
 		}
@@ -524,7 +608,7 @@ func (ps *PostgresRepository) DeleteFoodByName(foodID, cetegory string) error  {
 	if cetegory == types.SecondMeal {
 		_, err := ps.db.Exec(`
 			DELETE FROM second_meal WHERE id = $1
-		`, foodID)	
+		`, foodID)
 		if err != nil {
 			return err
 		}
@@ -532,7 +616,7 @@ func (ps *PostgresRepository) DeleteFoodByName(foodID, cetegory string) error  {
 	if cetegory == types.Salad {
 		_, err := ps.db.Exec(`
 			DELETE FROM salad WHERE id = $1
-		`, foodID)	
+		`, foodID)
 		if err != nil {
 			return err
 		}
@@ -540,7 +624,7 @@ func (ps *PostgresRepository) DeleteFoodByName(foodID, cetegory string) error  {
 	if cetegory == types.Dessert {
 		_, err := ps.db.Exec(`
 			DELETE FROM dessert WHERE id = $1
-		`, foodID)	
+		`, foodID)
 		if err != nil {
 			return err
 		}
@@ -548,7 +632,7 @@ func (ps *PostgresRepository) DeleteFoodByName(foodID, cetegory string) error  {
 	if cetegory == types.Beverage {
 		_, err := ps.db.Exec(`
 			DELETE FROM beverage WHERE id = $1
-		`, foodID)	
+		`, foodID)
 		if err != nil {
 			return err
 		}
@@ -556,4 +640,5 @@ func (ps *PostgresRepository) DeleteFoodByName(foodID, cetegory string) error  {
 
 	return nil
 }
+
 // sunbula *****************************************************************************************************************

@@ -51,7 +51,7 @@ CREATE TABLE tables (
 
 
 CREATE TABLE purchase (
-    table_id UUID REFERENCES client (id),
+    table_id UUID,
     first_meal_id UUID REFERENCES first_meal (id),
     second_meal_id UUID REFERENCES second_meal (id),
     dessert_id UUID REFERENCES dessert (id),

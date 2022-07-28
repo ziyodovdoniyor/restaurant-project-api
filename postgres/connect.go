@@ -8,9 +8,9 @@ import (
 const (
 	pgHost = "localhost"
 	pgPort = 5432
-	pgUser = "sunbula"
-	pgPass = "2307"
-	pdDB   = "restaurant"
+	pgUser = "pulat"
+	pgPass = "9"
+	pdDB   = "cafe"
 )
 
 func Connect() (*sql.DB, error) {

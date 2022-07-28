@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"restaurant/menu"
 	"restaurant/types"
@@ -10,24 +11,93 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+//API and REPO
+
 type Repository interface {
 	// sunbula
 	Menu() ([]types.Food, error)
 	AddFood(f types.Food) error
-	GetFoodIDByName(foodName string, foods []types.Food) (string, string) 
-	UpdateSecondMeal(id string, f types.Food) error 
+	GetFoodIDByName(foodName string, foods []types.Food) (string, string)
+	UpdateSecondMeal(id string, f types.Food) error
 	UpdateSaladMeal(id string, f types.Food) error
 	UpdateDessertMeal(id string, f types.Food) error
 	UpdateFirstMeal(id string, f types.Food) error
 	UpdateBeverageMeal(id string, f types.Food) error
 	GetFood(foods []types.Food, id string) (types.Food, error)
-	DeleteFoodByName(foodID, cetegory string) error 
+	DeleteFoodByName(foodID, cetegory string) error
 	// sunbula
+	GetTables() ([]int, error)
+	TakeTable(num int) (types.Table, bool, error)
+	Buy(purchase *types.Purchase) (int, error)
 }
 
 type Handler struct {
 	repo  Repository
 	table types.Table
+}
+
+func (h *Handler) Buy(c *gin.Context) {
+	var request types.Purchase
+	if er := c.ShouldBindJSON(&request); er != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": er.Error(),
+		})
+		return
+	}
+	purchase := menu.NewPurchase(request.ClientID, request.FirstMealID, request.SecondMealID, request.DessertID, request.SaladID, request.BeverageID, request.Total)
+	sum, er := h.repo.Buy(purchase)
+	if er != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": er.Error(),
+		})
+	}
+	c.JSON(500, gin.H{
+		"total sum": sum,
+	})
+}
+
+func (h *Handler) TakeTable(c *gin.Context) {
+	table := h.table
+	var er error
+	table.Number, er = strconv.Atoi(c.Query("num"))
+	if er != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": er.Error(),
+		})
+		return
+	}
+	table, table.IsTaken, er = h.repo.TakeTable(table.Number)
+	if er != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": er.Error(),
+		})
+		return
+	} else if table.IsTaken && er == nil {
+		c.JSON(http.StatusOK, gin.H{
+			":(": fmt.Sprintf("there is no table with № %d", table.Number),
+		})
+		return
+	}
+	if !table.IsTaken {
+		c.JSON(http.StatusOK, gin.H{
+			":)": fmt.Sprintf("your table's id is %s", table.ID),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		":(": fmt.Sprintf("table № %d is taken", table.Number),
+	})
+}
+
+func (h *Handler) GetTables(c *gin.Context) {
+	tableNumbers, er := h.repo.GetTables()
+	if er != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"error": er.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, tableNumbers)
 }
 
 // Menu hamma ovqatlar ro'yxatini chiqazib beradi. Bunda ovqatlar ro'yxati quyidagi tartibda chiqadi:
@@ -50,7 +120,6 @@ func (h *Handler) Menu(c *gin.Context) {
 
 	c.JSON(http.StatusOK, data)
 }
-
 
 // AddFood body orqali ovqatni menuga qo'shadi. Bunda bodyda quyidagi ma'lumotlar kiritilgan bo'lishi kk:
 // {
@@ -91,7 +160,7 @@ func (h *Handler) AddFood(c *gin.Context) {
 // Bunda quyodagi ma'lumotlardan birini yoki hammasini o'zgartirishi mumkin: 
 // name, ingredients, price, quantity
 // vaqti server tomonidan avtomatik o'zgartiriladi
-func (h *Handler) UpdateFood(c *gin.Context)  {
+func (h *Handler) UpdateFood(c *gin.Context) {
 	foodName, ok := c.GetQuery("name")
 	if !ok {
 		c.AbortWithStatusJSON(
@@ -188,13 +257,11 @@ func (h *Handler) UpdateFood(c *gin.Context)  {
 		}
 	}
 
-	
-
 	c.Status(http.StatusOK)
 }
 
 // GetFood methodi query orqali berilgan ovqatning nomidan o'sha ovqat haqidagi barcha ma'lumotlarni userga chiqazib beradi
-func (h *Handler) GetFood(c *gin.Context)  {
+func (h *Handler) GetFood(c *gin.Context) {
 	foodName, ok := c.GetQuery("name")
 	if !ok {
 		c.AbortWithStatusJSON(
@@ -233,8 +300,9 @@ func (h *Handler) GetFood(c *gin.Context)  {
 	c.JSON(http.StatusOK, WantedFood)
 
 }
+
 // DeletFood metodi query orqali berilgan ovqatning nomi bo'yicha ovqatni o'chirib tashlaydi.
-func (h *Handler) DeleteFood(c *gin.Context)  {
+func (h *Handler) DeleteFood(c *gin.Context) {
 	foodName, ok := c.GetQuery("name")
 	if !ok {
 		c.AbortWithStatusJSON(
@@ -258,7 +326,7 @@ func (h *Handler) DeleteFood(c *gin.Context)  {
 	}
 
 	foodID, category := h.repo.GetFoodIDByName(foodName, allFoods)
-	 
+
 	err = h.repo.DeleteFoodByName(foodID, category)
 	if err != nil {
 		c.AbortWithStatusJSON(
@@ -271,8 +339,6 @@ func (h *Handler) DeleteFood(c *gin.Context)  {
 	}
 }
 
-
-
 func NewRouter(repo Repository) *gin.Engine {
 	r := gin.Default()
 	h := Handler{repo: repo}
@@ -281,12 +347,13 @@ func NewRouter(repo Repository) *gin.Engine {
 	r.GET("/menu/salad")
 	r.GET("/menu/dessert")
 	r.GET("/menu/drinks")
-	
-	r.GET("/table/")
-	r.POST("/table/buy/")
-	
+
+	r.GET("/tables", h.GetTables)
+	r.POST("/table", h.TakeTable)
+	r.POST("/table/buy", h.Buy)
+
 	r.GET("/table/buy/budget/")
-	
+
 	// sunbula
 	r.GET("/menu", h.Menu)
 	r.POST("/add/food", h.AddFood)
