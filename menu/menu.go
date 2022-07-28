@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func NewFood(category, name, ing string, price int) *types.Food {
+func NewFood(category, name, ing string, price float32, quantity int) *types.Food {
 	id := uuid.New()
 	return &types.Food{
 		ID: id.String(),
@@ -15,6 +15,7 @@ func NewFood(category, name, ing string, price int) *types.Food {
 		Category: category,
 		Ingredients: ing,
 		Price: price,
+		Quantity: quantity,
 		CookedAt: time.Now(),
 	}
 }

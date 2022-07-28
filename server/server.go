@@ -126,7 +126,8 @@ func (h *Handler) Menu(c *gin.Context) {
 // 		"name": "ovqatning nome",
 //		"category": "ovqatning qaysi turdagi ovqatligi (first_meal, second_meal, beverage, salad, dessert) ",
 //		"ingredients" : "ovqat tarkibidagi mahsulotlar",
-//		"price": narxi
+//		"price": narxi,
+//		"quantity": miqdori (portsi)
 // }
 // pichirilgan vaqti va idsi server tomonidan qo'shiladi.
 // P.S ovqatning name unique
@@ -141,7 +142,7 @@ func (h *Handler) AddFood(c *gin.Context) {
 		)
 		return
 	}
-	newFood := menu.NewFood(food.Category, food.Name, food.Ingredients, food.Price)
+	newFood := menu.NewFood(food.Category, food.Name, food.Ingredients, food.Price, food.Quantity)
 	err := h.repo.AddFood(*newFood)
 	if err != nil {
 		c.AbortWithStatusJSON(
@@ -155,9 +156,9 @@ func (h *Handler) AddFood(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
-// UpdateFood ovqatning ma'lumotlarini body orqali o'zgartiradi.
-// Bunda quyodagi ma'lumotlardan birini yoki hammasini o'zgartirishi mumkin:
-// name, ingredients, price
+// UpdateFood ovqatning ma'lumotlarini body orqali o'zgartiradi. 
+// Bunda quyodagi ma'lumotlardan birini yoki hammasini o'zgartirishi mumkin: 
+// name, ingredients, price, quantity
 // vaqti server tomonidan avtomatik o'zgartiriladi
 func (h *Handler) UpdateFood(c *gin.Context) {
 	foodName, ok := c.GetQuery("name")
