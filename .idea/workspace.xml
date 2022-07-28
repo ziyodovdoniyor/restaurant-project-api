@@ -4,13 +4,7 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7e40c6cc-2a94-4aef-b34e-9d4439b94356" name="Changes" comment="mem">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/postgres/connect.go" beforeDir="false" afterPath="$PROJECT_DIR$/postgres/connect.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/postgres/create.sql" beforeDir="false" afterPath="$PROJECT_DIR$/postgres/create.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/postgres/repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/postgres/repository.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/server.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/server.go" afterDir="false" />
-    </list>
+    <list default="true" id="7e40c6cc-2a94-4aef-b34e-9d4439b94356" name="Changes" comment="mem" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
