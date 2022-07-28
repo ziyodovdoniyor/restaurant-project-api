@@ -101,6 +101,158 @@ func (p *PostgresRepository) GetTables() ([]int, error) {
 	return tableNumbers, nil
 }
 
+//************************************************
+
+func (ps *PostgresRepository) First() ([]types.Food, error) {
+	tx, err := ps.db.Begin()
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	var foods []types.Food
+
+	rows, err := tx.Query(`SELECT name, ingredients, price, cooked_at FROM first_meal`)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	for rows.Next() {
+		f := types.Food{
+			ID: "",
+		}
+		err := rows.Scan(&f.Name, &f.Ingredients, &f.Price, &f.CookedAt)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+		foods = append(foods, f)
+	}
+	tx.Commit()
+	return foods, err
+}
+
+func (ps *PostgresRepository) Second() ([]types.Food, error) {
+	tx, err := ps.db.Begin()
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	var foods []types.Food
+
+	rows, err := tx.Query(`SELECT name, ingredients, price, cooked_at FROM second_meal`)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	for rows.Next() {
+		f := types.Food{
+			ID: "",
+		}
+		err := rows.Scan(&f.Name, &f.Ingredients, &f.Price, &f.CookedAt)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+		foods = append(foods, f)
+	}
+	tx.Commit()
+	return foods, err
+}
+
+func (ps *PostgresRepository) Salad() ([]types.Food, error) {
+	tx, err := ps.db.Begin()
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	var foods []types.Food
+
+	rows, err := tx.Query(`SELECT name, ingredients, price, cooked_at FROM salad`)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	for rows.Next() {
+		f := types.Food{
+			ID: "",
+		}
+		err := rows.Scan(&f.Name, &f.Ingredients, &f.Price, &f.CookedAt)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+		foods = append(foods, f)
+	}
+	tx.Commit()
+	return foods, err
+}
+
+func (ps *PostgresRepository) Dessert() ([]types.Food, error) {
+	tx, err := ps.db.Begin()
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	var foods []types.Food
+
+	rows, err := tx.Query(`SELECT name, ingredients, price, cooked_at FROM dessert`)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	for rows.Next() {
+		f := types.Food{
+			ID: "",
+		}
+		err := rows.Scan(&f.Name, &f.Ingredients, &f.Price, &f.CookedAt)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+		foods = append(foods, f)
+	}
+	tx.Commit()
+	return foods, err
+}
+
+func (ps *PostgresRepository) Drink() ([]types.Food, error) {
+	tx, err := ps.db.Begin()
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	var foods []types.Food
+
+	rows, err := tx.Query(`SELECT name, ingredients, price, cooked_at FROM beverage`)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	for rows.Next() {
+		f := types.Food{
+			ID: "",
+		}
+		err := rows.Scan(&f.Name, &f.Ingredients, &f.Price, &f.CookedAt)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+		foods = append(foods, f)
+	}
+	tx.Commit()
+	return foods, err
+}
+
 // sunbula **************************************************************************************************************
 func (ps *PostgresRepository) Menu() ([]types.Food, error) {
 	tx, err := ps.db.Begin()
