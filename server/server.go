@@ -26,9 +26,17 @@ type Repository interface {
 	GetFood(foods []types.Food, id string) (types.Food, error)
 	DeleteFoodByName(foodID, cetegory string) error
 	// sunbula
+
 	GetTables() ([]int, error)
 	TakeTable(num int) (types.Table, bool, error)
 	Buy(purchase *types.Purchase) (int, error)
+
+	// ibrohimjon
+	First() ([]types.Food, error)
+	Second() ([]types.Food, error)
+	Salad() ([]types.Food, error)
+	Dessert() ([]types.Food, error)
+	Drink() ([]types.Food, error)
 }
 
 type Handler struct {
@@ -98,6 +106,66 @@ func (h *Handler) GetTables(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, tableNumbers)
+}
+
+func (h *Handler) First(c *gin.Context) {
+	firstFoods, err := h.repo.First()
+	if err != nil {
+		c.AbortWithStatusJSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"error": "data couldn't be shown",
+			})
+	}
+	c.JSON(http.StatusOK, firstFoods)
+}
+
+func (h *Handler) Second(c *gin.Context) {
+	secondFoods, err := h.repo.Second()
+	if err != nil {
+		c.AbortWithStatusJSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"error": "data couldn't be shown",
+			})
+	}
+	c.JSON(http.StatusOK, secondFoods)
+}
+
+func (h *Handler) Salad(c *gin.Context) {
+	salad, err := h.repo.Salad()
+	if err != nil {
+		c.AbortWithStatusJSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"error": "data couldn't be shown",
+			})
+	}
+	c.JSON(http.StatusOK, salad)
+}
+
+func (h *Handler) Dessert(c *gin.Context) {
+	dessert, err := h.repo.Dessert()
+	if err != nil {
+		c.AbortWithStatusJSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"error": "data couldn't be shown",
+			})
+	}
+	c.JSON(http.StatusOK, dessert)
+}
+
+func (h *Handler) Drink(c *gin.Context) {
+	drink, err := h.repo.Drink()
+	if err != nil {
+		c.AbortWithStatusJSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"error": "data couldn't be shown",
+			})
+	}
+	c.JSON(http.StatusOK, drink)
 }
 
 // Menu hamma ovqatlar ro'yxatini chiqazib beradi. Bunda ovqatlar ro'yxati quyidagi tartibda chiqadi:
@@ -342,11 +410,11 @@ func (h *Handler) DeleteFood(c *gin.Context) {
 func NewRouter(repo Repository) *gin.Engine {
 	r := gin.Default()
 	h := Handler{repo: repo}
-	r.GET("/menu/first-meal")
-	r.GET("/menu/second-meal")
-	r.GET("/menu/salad")
-	r.GET("/menu/dessert")
-	r.GET("/menu/drinks")
+	r.GET("/menu/first-meal", h.First)
+	r.GET("/menu/second-meal", h.Second)
+	r.GET("/menu/salad", h.Salad)
+	r.GET("/menu/dessert", h.Dessert)
+	r.GET("/menu/drinks", h.Drink)
 
 	r.GET("/tables", h.GetTables)
 	r.POST("/table", h.TakeTable)
