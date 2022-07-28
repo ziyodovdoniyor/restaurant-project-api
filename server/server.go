@@ -37,6 +37,8 @@ type Repository interface {
 	Salad() ([]types.Food, error)
 	Dessert() ([]types.Food, error)
 	Drink() ([]types.Food, error)
+	// doniyor
+	Sets(cash float64) ([][]types.Food, error)
 }
 
 type Handler struct {
@@ -224,8 +226,8 @@ func (h *Handler) AddFood(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
-// UpdateFood ovqatning ma'lumotlarini body orqali o'zgartiradi. 
-// Bunda quyodagi ma'lumotlardan birini yoki hammasini o'zgartirishi mumkin: 
+// UpdateFood ovqatning ma'lumotlarini body orqali o'zgartiradi.
+// Bunda quyodagi ma'lumotlardan birini yoki hammasini o'zgartirishi mumkin:
 // name, ingredients, price, quantity
 // vaqti server tomonidan avtomatik o'zgartiriladi
 func (h *Handler) UpdateFood(c *gin.Context) {
@@ -407,6 +409,37 @@ func (h *Handler) DeleteFood(c *gin.Context) {
 	}
 }
 
+//Sets metodi userga set yaratib beradi
+func (h Handler) Sets(c *gin.Context) {
+	cashstr, ok := c.GetQuery("cash")
+	cash, err := strconv.ParseFloat(cashstr, 64)
+	if err != nil {
+		panic(err)
+	}
+	if !ok {
+		c.AbortWithStatusJSON(
+			http.StatusBadRequest,
+			gin.H{
+				"error": fmt.Sprintf("invalid query %v", ok),
+			},
+		)
+		return
+	}
+
+	sets, err := h.repo.Sets(cash)
+	if err != nil {
+		c.AbortWithStatusJSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"error": fmt.Sprintf("Sets(): %v", err),
+			},
+		)
+		return
+	}
+
+	c.JSON(http.StatusOK, sets)
+}
+
 func NewRouter(repo Repository) *gin.Engine {
 	r := gin.Default()
 	h := Handler{repo: repo}
@@ -429,5 +462,9 @@ func NewRouter(repo Repository) *gin.Engine {
 	r.PUT("/update/food/", h.UpdateFood)
 	r.DELETE("/delete/food/", h.DeleteFood)
 	// sunbula
+
+	//doniyor
+	r.GET("/set", h.Sets)
+
 	return r
 }

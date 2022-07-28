@@ -8,8 +8,8 @@ import (
 const (
 	pgHost = "localhost"
 	pgPort = 5432
-	pgUser = "pulat"
-	pgPass = "9"
+	pgUser = "doniyor"
+	pgPass = "7355950d"
 	pdDB   = "cafe"
 )
 

@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"restaurant/types"
 	"time"
@@ -794,3 +795,112 @@ func (ps *PostgresRepository) DeleteFoodByName(foodID, cetegory string) error {
 }
 
 // sunbula *****************************************************************************************************************
+
+// doniyor *****************************************************************************************************************
+
+func (ps *PostgresRepository) Sets(cash float64) ([][]types.Food, error) {
+	tx, err := ps.db.Begin()
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	var sets [][]types.Food
+	meal1 := make([]types.Food, 1, 1)
+	meal2 := make([]types.Food, 1, 1)
+	desert := make([]types.Food, 1, 1)
+	salad := make([]types.Food, 1, 1)
+	cashmeal1 := cash * 0.5
+	cashmeal2 := cash * 0.5
+	cashdesert := cash * 0.2
+	cashsalad := cash * 0.3
+
+	firstmeal, err := tx.Query(`SELECT * FROM first_meal WHERE price < $1`, cashmeal1)
+	if errors.Is(err, sql.ErrNoRows) {
+		meal1 = nil
+	} else if err != nil {
+		tx.Rollback()
+		return nil, err
+	} else {
+		for firstmeal.Next() {
+			f := types.Food{}
+			if err := firstmeal.Scan(&f.ID, &f.Name, &f.Ingredients, &f.Price, &f.CookedAt); err != nil {
+				tx.Rollback()
+				return nil, err
+			}
+			f.Category = types.FirstMeal
+			meal1 = append(meal1, f)
+		}
+	}
+
+	if meal1 != nil {
+		goto desert
+	} else {
+		secondmeal, err := tx.Query(`SELECT * FROM second_meal WHERE price < $1`, cashmeal2)
+		if errors.Is(err, sql.ErrNoRows) {
+			meal2 = nil
+		} else if err != nil {
+			tx.Rollback()
+			return nil, err
+		} else {
+			for secondmeal.Next() {
+				f := types.Food{}
+				if err := secondmeal.Scan(&f.ID, &f.Name, &f.Ingredients, &f.Price, &f.CookedAt); err != nil {
+					tx.Rollback()
+					return nil, err
+				}
+				f.Category = types.SecondMeal
+				meal2 = append(meal2, f)
+			}
+		}
+	}
+
+desert:
+	if meal2 == nil {
+		cashdesert = cash * 0.5
+	}
+	deserts, err := tx.Query(`SELECT * FROM dessert WHERE price < $1`, cashdesert)
+	if errors.Is(err, sql.ErrNoRows) {
+		desert = nil
+	} else if err != nil {
+		tx.Rollback()
+		return nil, err
+	} else {
+		for deserts.Next() {
+			f := types.Food{}
+			if err := deserts.Scan(&f.ID, &f.Name, &f.Ingredients, &f.Price, &f.CookedAt); err != nil {
+				tx.Rollback()
+				return nil, err
+			}
+			f.Category = types.Dessert
+			desert = append(desert, f)
+		}
+	}
+	if meal1 == nil && meal2 == nil {
+		cashsalad = cash * 0.5
+		if desert == nil {
+			cashsalad = cash
+		}
+	}
+	salads, err := tx.Query(`SELECT * FROM salad WHERE price < $1`, cashsalad)
+	if errors.Is(err, sql.ErrNoRows) {
+		salad = nil
+	} else if err != nil {
+		tx.Rollback()
+		return nil, err
+	} else {
+		for salads.Next() {
+			f := types.Food{}
+			if err := salads.Scan(&f.ID, &f.Name, &f.Ingredients, &f.Price, &f.CookedAt); err != nil {
+				tx.Rollback()
+				return nil, err
+			}
+			f.Category = types.Salad
+			salad = append(salad, f)
+		}
+	}
+	sets = append(sets, meal1, meal2, salad, desert)
+	return sets, nil
+}
+
+// doniyor *****************************************************************************************************************
