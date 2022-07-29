@@ -1,10 +1,9 @@
 package main
 
 import (
+	"log"
 	"restaurant/postgres"
 	"restaurant/server"
-
-	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -16,5 +15,8 @@ func main() {
 	repo := postgres.NewPostgresRepository(db)
 	r := server.NewRouter(repo)
 
-	r.Run()
+	if err = r.Run(); err != nil {
+		log.Fatal("er: ", err)
+		return
+	}
 }
