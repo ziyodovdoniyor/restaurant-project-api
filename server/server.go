@@ -9,6 +9,7 @@ import (
 	"restaurant/types"
 
 	"github.com/gin-gonic/gin"
+	_ "github.com/lib/pq"
 )
 
 //API and REPO
