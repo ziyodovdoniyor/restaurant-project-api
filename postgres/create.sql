@@ -1,9 +1,16 @@
+-- DROP TABLE purchase;
+-- DROP TABLE beverage;
+-- DROP TABLE salad;
+-- DROP TABLE dessert;
+-- DROP TABLE second_meal;
+-- DROP TABLE first_meal;
+
 CREATE TABLE first_meal (
     id UUID PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE,
     ingredients TEXT NOT NULL,
     price FLOAT NOT NULL,
-    quantity INTEGER, 
+    quantity INTEGER,
     cooked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -60,12 +67,3 @@ CREATE TABLE purchase (
     total INTEGER NOT NULL,
     purchased_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
--- DROP TABLE purchase;
--- DROP TABLE beverage;
--- DROP TABLE salad;
--- DROP TABLE dessert;
--- DROP TABLE second_meal;
--- DROP TABLE first_meal;
-
--- SELECT * FROM salad;
