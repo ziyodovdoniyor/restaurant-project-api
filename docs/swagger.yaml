@@ -14,6 +14,36 @@ definitions:
       table_id:
         type: string
     type: object
+  types.Food:
+    properties:
+      category:
+        type: string
+      cooked_at:
+        type: string
+      id:
+        type: string
+      ingredients:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      quantity:
+        type: integer
+    type: object
+  types.PreEnterFood:
+    properties:
+      category:
+        type: string
+      ingredients:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      quantity:
+        type: integer
+    type: object
   types.Purchase:
     properties:
       beverage_id:
@@ -33,6 +63,17 @@ definitions:
       total:
         type: integer
     type: object
+  types.UpdateFood:
+    properties:
+      ingredients:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      quantity:
+        type: integer
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -47,6 +88,95 @@ info:
   title: Swagger Restaurant API
   version: "1.0"
 paths:
+  /add/food:
+    post:
+      consumes:
+      - application/json
+      description: Add food to the menu, food name must be unique
+      parameters:
+      - description: Food info
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/types.PreEnterFood'
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Add food
+      tags:
+      - sunbula
+  /delete/food/:
+    delete:
+      consumes:
+      - application/json
+      description: deletes food by its name
+      parameters:
+      - description: delete food by name
+        in: query
+        name: name
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      summary: Delete food
+      tags:
+      - sunbula
+  /food/:
+    get:
+      consumes:
+      - application/json
+      description: it gets all information about the asked food
+      parameters:
+      - description: search food by name
+        in: query
+        name: name
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.Food'
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      summary: Get food
+      tags:
+      - sunbula
+  /menu:
+    get:
+      description: shows all items in the menu
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              items:
+                $ref: '#/definitions/types.Food'
+              type: array
+            type: array
+        "500":
+          description: Internal Server Error
+      summary: Menu
+      tags:
+      - sunbula
   /table:
     post:
       consumes:
@@ -125,4 +255,33 @@ paths:
       summary: GetTables
       tags:
       - tables
+  /update/food/:
+    put:
+      consumes:
+      - application/json
+      description: Update food in the menu
+      parameters:
+      - description: update food by name
+        in: query
+        name: name
+        required: true
+        type: string
+      - description: Food info
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/types.UpdateFood'
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      summary: Update food
+      tags:
+      - sunbula
 swagger: "2.0"

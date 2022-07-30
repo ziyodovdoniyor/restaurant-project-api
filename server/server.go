@@ -24,11 +24,11 @@ type Repository interface {
 	Menu() ([]types.Food, error)
 	AddFood(f types.Food) error
 	GetFoodIDByName(foodName string, foods []types.Food) (string, string)
-	UpdateSecondMeal(id string, f types.Food) error
-	UpdateSaladMeal(id string, f types.Food) error
-	UpdateDessertMeal(id string, f types.Food) error
-	UpdateFirstMeal(id string, f types.Food) error
-	UpdateBeverageMeal(id string, f types.Food) error
+	UpdateSecondMeal(id string, f types.UpdateFood) error
+	UpdateSaladMeal(id string, f types.UpdateFood) error
+	UpdateDessertMeal(id string, f types.UpdateFood) error
+	UpdateFirstMeal(id string, f types.UpdateFood) error
+	UpdateBeverageMeal(id string, f types.UpdateFood) error
 	GetFood(foods []types.Food, id string) (types.Food, error)
 	DeleteFoodByName(foodID, cetegory string) error
 	// sunbula
@@ -50,6 +50,50 @@ type Repository interface {
 type Handler struct {
 	repo  Repository
 	table types.Table
+}
+
+// NewRouter
+// @title           Swagger Restaurant API
+// @version         1.0
+// @description     This is a restaurant project.
+// @termsOfService  http://swagger.io/terms/
+
+// @contact.name   API Support
+// @contact.url    http://www.swagger.io/support
+// @contact.email  support@swagger.io
+
+// @license.name  Apache 2.0
+// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host      localhost:8080
+
+func NewRouter(repo Repository) *gin.Engine {
+	r := gin.Default()
+	h := Handler{repo: repo}
+	r.GET("/menu/first-meal", h.First)   // done
+	r.GET("/menu/second-meal", h.Second) // done
+	r.GET("/menu/salad", h.Salad)        // done
+	r.GET("/menu/dessert", h.Dessert)    // done
+	r.GET("/menu/drinks", h.Drink)       // done
+
+	r.GET("/tables", h.GetTables) // done
+	r.POST("/table", h.TakeTable) // done
+	r.POST("/table/buy", h.Buy)   // done
+
+	// sunbula
+	r.GET("/menu", h.Menu)                  // done
+	r.POST("/add/food", h.AddFood)          //
+	r.GET("/food/", h.GetFood)              //
+	r.PUT("/update/food/", h.UpdateFood)    //
+	r.DELETE("/delete/food/", h.DeleteFood) //
+	// sunbula
+
+	//doniyor
+	r.GET("/set", h.Sets) // problem with query
+
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	return r
 }
 
 // Buy
@@ -218,12 +262,14 @@ func (h *Handler) Drink(c *gin.Context) {
 	c.JSON(http.StatusOK, drink)
 }
 
-// Menu hamma ovqatlar ro'yxatini chiqazib beradi. Bunda ovqatlar ro'yxati quyidagi tartibda chiqadi:
-// 1. birinchi ovqatlar
-// 2. ikkinchi ovqatlar
-// 3. Dessertlar
-// 4. Saladlar
-// 5. Ichimliklar
+
+// @Summary      Menu
+// @Description  shows all items in the menu
+// @Tags         sunbula
+// @Produce      json
+// @Success      200  {array}  []types.Food
+// @Failure      500   
+// @Router       /menu [GET]
 func (h *Handler) Menu(c *gin.Context) {
 	data, err := h.repo.Menu()
 	if err != nil {
@@ -239,18 +285,17 @@ func (h *Handler) Menu(c *gin.Context) {
 	c.JSON(http.StatusOK, data)
 }
 
-// AddFood body orqali ovqatni menuga qo'shadi. Bunda bodyda quyidagi ma'lumotlar kiritilgan bo'lishi kk:
-// {
-// 		"name": "ovqatning nome",
-//		"category": "ovqatning qaysi turdagi ovqatligi (first_meal, second_meal, beverage, salad, dessert) ",
-//		"ingredients" : "ovqat tarkibidagi mahsulotlar",
-//		"price": narxi,
-//		"quantity": miqdori (portsi)
-// }
-// pichirilgan vaqti va idsi server tomonidan qo'shiladi.
-// P.S ovqatning name unique
+// @Summary      Add food
+// @Description  Add food to the menu, food name must be unique
+// @Tags         sunbula
+// @Accept       json
+// @Param        request body types.PreEnterFood  true  "Food info"
+// @Success      200  
+// @Failure      400     
+// @Failure      500     
+// @Router       /add/food [POST]
 func (h *Handler) AddFood(c *gin.Context) {
-	var food types.Food
+	var food types.PreEnterFood
 	if err := c.BindJSON(&food); err != nil {
 		c.AbortWithStatusJSON(
 			http.StatusBadRequest,
@@ -274,41 +319,36 @@ func (h *Handler) AddFood(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
-// UpdateFood ovqatning ma'lumotlarini body orqali o'zgartiradi.
-// Bunda quyodagi ma'lumotlardan birini yoki hammasini o'zgartirishi mumkin:
-// name, ingredients, price, quantity
-// vaqti server tomonidan avtomatik o'zgartiriladi
+// @Summary      Update food
+// @Description  Update food in the menu
+// @Tags         sunbula
+// @Accept       json
+// @Param        name    query     string  true  "update food by name" 
+// @Param        request body types.UpdateFood true "Food info"
+// @Success      200  
+// @Failure      400 
+// @Failure 	 404    
+// @Failure      500     
+// @Router       /update/food/ [PUT]
 func (h *Handler) UpdateFood(c *gin.Context) {
 	foodName, ok := c.GetQuery("name")
 	if !ok {
-		c.AbortWithStatusJSON(
-			http.StatusBadRequest,
-			gin.H{
-				"error": fmt.Sprintf("invalid query %v", ok),
-			},
-		)
+		message := fmt.Sprintf("name not spicified: %t", ok)
+		c.String(http.StatusBadRequest, message)
 		return
 	}
 
-	var updateFood types.Food
+	var updateFood types.UpdateFood
 	if err := c.BindJSON(&updateFood); err != nil {
-		c.AbortWithStatusJSON(
-			http.StatusBadRequest,
-			gin.H{
-				"error": fmt.Sprintf("invalid json: %v", err),
-			},
-		)
+		message := fmt.Sprintf("invalid json: %v", err)
+		c.String(http.StatusBadRequest, message)
 		return
 	}
 
 	allFoods, err := h.repo.Menu()
 	if err != nil {
-		c.AbortWithStatusJSON(
-			http.StatusInternalServerError,
-			gin.H{
-				"error": fmt.Sprintf(" Menu(): %v", err),
-			},
-		)
+		message := fmt.Sprintf("couldn't fetch data from menu: %v", err)
+		c.String(http.StatusInternalServerError, message)
 		return
 	}
 
@@ -317,68 +357,89 @@ func (h *Handler) UpdateFood(c *gin.Context) {
 	if category == types.SecondMeal {
 		err = h.repo.UpdateSecondMeal(foodID, updateFood)
 		if err != nil {
-			c.AbortWithStatusJSON(
-				http.StatusInternalServerError,
-				gin.H{
-					"error": fmt.Sprintf("UpdateFood(): %v", err),
-				},
-			)
-			return
+			if err == sql.ErrNoRows {
+				message := fmt.Sprintf("item not found from menu: %v", err)
+				c.String(http.StatusNotFound, message)
+				return
+			} else {
+				message := fmt.Sprintf("couldn't update item %v", err)
+				c.String(http.StatusInternalServerError, message)
+				return
+			}	
 		}
 	}
 	if category == types.FirstMeal {
 		err = h.repo.UpdateFirstMeal(foodID, updateFood)
 		if err != nil {
-			c.AbortWithStatusJSON(
-				http.StatusInternalServerError,
-				gin.H{
-					"error": fmt.Sprintf("UpdateFood(): %v", err),
-				},
-			)
-			return
+			if err == sql.ErrNoRows {
+				message := fmt.Sprintf("item not found from menu: %v", err)
+				c.String(http.StatusNotFound, message)
+				return
+			} else {
+				message := fmt.Sprintf("couldn't update item %v", err)
+				c.String(http.StatusInternalServerError, message)
+				return
+			}	
 		}
 	}
 	if category == types.Salad {
 		err = h.repo.UpdateSaladMeal(foodID, updateFood)
 		if err != nil {
-			c.AbortWithStatusJSON(
-				http.StatusInternalServerError,
-				gin.H{
-					"error": fmt.Sprintf("UpdateFood(): %v", err),
-				},
-			)
-			return
+			if err == sql.ErrNoRows {
+				message := fmt.Sprintf("item not found from menu: %v", err)
+				c.String(http.StatusNotFound, message)
+				return
+			} else {
+				message := fmt.Sprintf("couldn't update item %v", err)
+				c.String(http.StatusInternalServerError, message)
+				return
+			}	
 		}
 	}
 	if category == types.Dessert {
 		err = h.repo.UpdateDessertMeal(foodID, updateFood)
 		if err != nil {
-			c.AbortWithStatusJSON(
-				http.StatusInternalServerError,
-				gin.H{
-					"error": fmt.Sprintf("UpdateFood(): %v", err),
-				},
-			)
-			return
+			if err == sql.ErrNoRows {
+				message := fmt.Sprintf("item not found from menu: %v", err)
+				c.String(http.StatusNotFound, message)
+				return
+			} else {
+				message := fmt.Sprintf("couldn't update item %v", err)
+				c.String(http.StatusInternalServerError, message)
+				return
+			}	
 		}
 	}
 	if category == types.Beverage {
 		err = h.repo.UpdateBeverageMeal(foodID, updateFood)
 		if err != nil {
-			c.AbortWithStatusJSON(
-				http.StatusInternalServerError,
-				gin.H{
-					"error": fmt.Sprintf("UpdateFood(): %v", err),
-				},
-			)
-			return
+			if err == sql.ErrNoRows {
+				message := fmt.Sprintf("item not found from menu: %v", err)
+				c.String(http.StatusNotFound, message)
+				return
+			} else {
+				message := fmt.Sprintf("couldn't update item %v", err)
+				c.String(http.StatusInternalServerError, message)
+				return
+			}	
 		}
 	}
 
-	c.Status(http.StatusOK)
+	message := "succesfuly updated"
+	c.String(http.StatusOK, message)
 }
 
-// GetFood methodi query orqali berilgan ovqatning nomidan o'sha ovqat haqidagi barcha ma'lumotlarni userga chiqazib beradi
+
+// @Summary      Get food
+// @Description  it gets all information about the asked food
+// @Tags         sunbula
+// @Accept       json
+// @Param        name    query     string  true  "search food by name"  
+// @Success      200  {object} types.Food
+// @Failure      400 
+// @Failure 	 404    
+// @Failure      500     
+// @Router       /food/ [GET]
 func (h *Handler) GetFood(c *gin.Context) {
 	foodName, ok := c.GetQuery("name")
 	if !ok {
@@ -407,9 +468,9 @@ func (h *Handler) GetFood(c *gin.Context) {
 	WantedFood, err := h.repo.GetFood(allFoods, foodID)
 	if err != nil {
 		c.AbortWithStatusJSON(
-			http.StatusBadRequest,
+			http.StatusNotFound,
 			gin.H{
-				"error": fmt.Sprintf("invalid query %v", ok),
+				"error": fmt.Sprintf("item not found %v", err),
 			},
 		)
 		return
@@ -419,7 +480,17 @@ func (h *Handler) GetFood(c *gin.Context) {
 
 }
 
-// DeletFood metodi query orqali berilgan ovqatning nomi bo'yicha ovqatni o'chirib tashlaydi.
+
+// @Summary      Delete food
+// @Description  deletes food by its name
+// @Tags         sunbula
+// @Accept       json
+// @Param        name    query     string  true  "delete food by name"  
+// @Success      200  
+// @Failure      400 
+// @Failure 	 404    
+// @Failure      500     
+// @Router       /delete/food/ [DELETE]
 func (h *Handler) DeleteFood(c *gin.Context) {
 	foodName, ok := c.GetQuery("name")
 	if !ok {
@@ -447,14 +518,27 @@ func (h *Handler) DeleteFood(c *gin.Context) {
 
 	err = h.repo.DeleteFoodByName(foodID, category)
 	if err != nil {
-		c.AbortWithStatusJSON(
-			http.StatusInternalServerError,
-			gin.H{
-				"error": fmt.Sprintf(" DeleteFood(): %v", err),
-			},
-		)
-		return
+		if err == sql.ErrNoRows {
+			c.AbortWithStatusJSON(
+				http.StatusNotFound,
+				gin.H{
+					"error": fmt.Sprintf(" DeleteFood(): %v", err),
+				},
+			)
+			return
+		} else {
+			c.AbortWithStatusJSON(
+				http.StatusInternalServerError,
+				gin.H{
+					"error": fmt.Sprintf(" DeleteFood(): %v", err),
+				},
+			)
+			return
+		}
+		
 	}
+
+	c.String(http.StatusOK, "successfully deleted")
 }
 
 //Sets metodi userga set yaratib beradi
@@ -488,46 +572,4 @@ func (h Handler) Sets(c *gin.Context) {
 	c.JSON(http.StatusOK, sets)
 }
 
-// NewRouter
-// @title           Swagger Restaurant API
-// @version         1.0
-// @description     This is a restaurant project.
-// @termsOfService  http://swagger.io/terms/
 
-// @contact.name   API Support
-// @contact.url    http://www.swagger.io/support
-// @contact.email  support@swagger.io
-
-// @license.name  Apache 2.0
-// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
-
-// @host      localhost:8080
-
-func NewRouter(repo Repository) *gin.Engine {
-	r := gin.Default()
-	h := Handler{repo: repo}
-	r.GET("/menu/first-meal", h.First)   // done
-	r.GET("/menu/second-meal", h.Second) // done
-	r.GET("/menu/salad", h.Salad)        // done
-	r.GET("/menu/dessert", h.Dessert)    // done
-	r.GET("/menu/drinks", h.Drink)       // done
-
-	r.GET("/tables", h.GetTables) // done
-	r.POST("/table", h.TakeTable) // done
-	r.POST("/table/buy", h.Buy)   // done
-
-	// sunbula
-	r.GET("/menu", h.Menu)                  // done
-	r.POST("/add/food", h.AddFood)          //
-	r.GET("/food/", h.GetFood)              //
-	r.PUT("/update/food/", h.UpdateFood)    //
-	r.DELETE("/delete/food/", h.DeleteFood) //
-	// sunbula
-
-	//doniyor
-	r.GET("/set", h.Sets) // problem with query
-
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
-	return r
-}
