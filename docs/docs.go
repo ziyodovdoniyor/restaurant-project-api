@@ -25,6 +25,142 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/add/food": {
+            "post": {
+                "description": "Add food to the menu, food name must be unique",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sunbula"
+                ],
+                "summary": "Add food",
+                "parameters": [
+                    {
+                        "description": "Food info",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.PreEnterFood"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/delete/food/": {
+            "delete": {
+                "description": "deletes food by its name",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sunbula"
+                ],
+                "summary": "Delete food",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "delete food by name",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/food/": {
+            "get": {
+                "description": "it gets all information about the asked food",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sunbula"
+                ],
+                "summary": "Get food",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "search food by name",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/types.Food"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/menu": {
+            "get": {
+                "description": "shows all items in the menu",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sunbula"
+                ],
+                "summary": "Menu",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/definitions/types.Food"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/table": {
             "post": {
                 "description": "you can choose one of the free tables",
@@ -143,6 +279,50 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/update/food/": {
+            "put": {
+                "description": "Update food in the menu",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sunbula"
+                ],
+                "summary": "Update food",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "update food by name",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "description": "Food info",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.UpdateFood"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -166,6 +346,52 @@ const docTemplate = `{
                 },
                 "table_id": {
                     "type": "string"
+                }
+            }
+        },
+        "types.Food": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "cooked_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "ingredients": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "quantity": {
+                    "type": "integer"
+                }
+            }
+        },
+        "types.PreEnterFood": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "ingredients": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "quantity": {
+                    "type": "integer"
                 }
             }
         },
@@ -194,6 +420,23 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "types.UpdateFood": {
+            "type": "object",
+            "properties": {
+                "ingredients": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "quantity": {
                     "type": "integer"
                 }
             }

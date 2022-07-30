@@ -11,6 +11,20 @@ type Food struct {
 	Quantity    int       `json:"quantity,omitempty"`
 	CookedAt    time.Time `json:"cooked_at,omitempty"`
 }
+type PreEnterFood struct {
+	Name        string  `json:"name,omitempty"`
+	Category    string  `json:"category,omitempty"`
+	Ingredients string  `json:"ingredients,omitempty"`
+	Price       float32 `json:"price,omitempty"`
+	Quantity    int     `json:"quantity,omitempty"`
+}
+
+type UpdateFood struct {
+	Name        string  `json:"name,omitempty"`
+	Ingredients string  `json:"ingredients,omitempty"`
+	Price       float32 `json:"price,omitempty"`
+	Quantity    int     `json:"quantity,omitempty"`
+}
 
 const (
 	FirstMeal  = "first_meal"

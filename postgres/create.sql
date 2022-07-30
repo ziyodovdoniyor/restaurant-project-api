@@ -4,6 +4,7 @@
 -- DROP TABLE dessert;
 -- DROP TABLE second_meal;
 -- DROP TABLE first_meal;
+-- DROP TABLE tables;
 
 CREATE TABLE first_meal (
     id UUID PRIMARY KEY,

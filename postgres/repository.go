@@ -382,7 +382,7 @@ func (ps *PostgresRepository) AddFood(f types.Food) error {
 		}
 	} else if f.Category == types.Beverage {
 		_, err := ps.db.Exec(`
-		INSERT INTO beverage(id, name, ingredients, price, qauntity, cooked_at)
+		INSERT INTO beverage(id, name, ingredients, price, quantity, cooked_at)
 		VALUES ($1, $2, $3, $4, $5, $6)
 	`, f.ID, f.Name, f.Ingredients, f.Price, f.Quantity, f.CookedAt)
 
@@ -408,7 +408,7 @@ func (ps *PostgresRepository) GetFoodIDByName(foodName string, foods []types.Foo
 	return id, category
 }
 
-func (ps *PostgresRepository) UpdateSecondMeal(id string, f types.Food) error {
+func (ps *PostgresRepository) UpdateSecondMeal(id string, f types.UpdateFood) error {
 	tx, err := ps.db.Begin()
 	if err != nil {
 		tx.Rollback()
@@ -472,7 +472,7 @@ func (ps *PostgresRepository) UpdateSecondMeal(id string, f types.Food) error {
 	return nil
 }
 
-func (ps *PostgresRepository) UpdateFirstMeal(id string, f types.Food) error {
+func (ps *PostgresRepository) UpdateFirstMeal(id string, f types.UpdateFood) error {
 	tx, err := ps.db.Begin()
 	if err != nil {
 		tx.Rollback()
@@ -536,7 +536,7 @@ func (ps *PostgresRepository) UpdateFirstMeal(id string, f types.Food) error {
 	return nil
 }
 
-func (ps *PostgresRepository) UpdateSaladMeal(id string, f types.Food) error {
+func (ps *PostgresRepository) UpdateSaladMeal(id string, f types.UpdateFood) error {
 	tx, err := ps.db.Begin()
 	if err != nil {
 		tx.Rollback()
@@ -600,7 +600,7 @@ func (ps *PostgresRepository) UpdateSaladMeal(id string, f types.Food) error {
 	return nil
 }
 
-func (ps *PostgresRepository) UpdateDessertMeal(id string, f types.Food) error {
+func (ps *PostgresRepository) UpdateDessertMeal(id string, f types.UpdateFood) error {
 	tx, err := ps.db.Begin()
 	if err != nil {
 		tx.Rollback()
@@ -664,7 +664,7 @@ func (ps *PostgresRepository) UpdateDessertMeal(id string, f types.Food) error {
 	return nil
 }
 
-func (ps *PostgresRepository) UpdateBeverageMeal(id string, f types.Food) error {
+func (ps *PostgresRepository) UpdateBeverageMeal(id string, f types.UpdateFood) error {
 	tx, err := ps.db.Begin()
 	if err != nil {
 		tx.Rollback()
@@ -745,8 +745,11 @@ func (ps *PostgresRepository) GetFood(foods []types.Food, id string) (types.Food
 	return f, nil
 }
 
-func (ps *PostgresRepository) DeleteFoodByName(foodID, cetegory string) error {
-	if cetegory == types.FirstMeal {
+func (ps *PostgresRepository) DeleteFoodByName(foodID, category string) error {
+	if foodID == "" || category == "" {
+		return sql.ErrNoRows
+	}
+	if category == types.FirstMeal {
 		_, err := ps.db.Exec(`
 			DELETE FROM first_meal WHERE id = $1
 		`, foodID)
@@ -754,7 +757,7 @@ func (ps *PostgresRepository) DeleteFoodByName(foodID, cetegory string) error {
 			return err
 		}
 	}
-	if cetegory == types.SecondMeal {
+	if category == types.SecondMeal {
 		_, err := ps.db.Exec(`
 			DELETE FROM second_meal WHERE id = $1
 		`, foodID)
@@ -762,7 +765,7 @@ func (ps *PostgresRepository) DeleteFoodByName(foodID, cetegory string) error {
 			return err
 		}
 	}
-	if cetegory == types.Salad {
+	if category == types.Salad {
 		_, err := ps.db.Exec(`
 			DELETE FROM salad WHERE id = $1
 		`, foodID)
@@ -770,7 +773,7 @@ func (ps *PostgresRepository) DeleteFoodByName(foodID, cetegory string) error {
 			return err
 		}
 	}
-	if cetegory == types.Dessert {
+	if category == types.Dessert {
 		_, err := ps.db.Exec(`
 			DELETE FROM dessert WHERE id = $1
 		`, foodID)
@@ -778,7 +781,7 @@ func (ps *PostgresRepository) DeleteFoodByName(foodID, cetegory string) error {
 			return err
 		}
 	}
-	if cetegory == types.Beverage {
+	if category == types.Beverage {
 		_, err := ps.db.Exec(`
 			DELETE FROM beverage WHERE id = $1
 		`, foodID)
