@@ -1,0 +1,128 @@
+definitions:
+  postgres.PurchaseR:
+    properties:
+      beverage_id:
+        type: string
+      dessert_id:
+        type: string
+      first_meal_id:
+        type: string
+      salad_id:
+        type: string
+      second_meal_id:
+        type: string
+      table_id:
+        type: string
+    type: object
+  types.Purchase:
+    properties:
+      beverage_id:
+        type: string
+      dessert_id:
+        type: string
+      first_meal_id:
+        type: string
+      purchased_at:
+        type: string
+      salad_id:
+        type: string
+      second_meal_id:
+        type: string
+      table_id:
+        type: string
+      total:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a restaurant project.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Swagger Restaurant API
+  version: "1.0"
+paths:
+  /table:
+    post:
+      consumes:
+      - application/json
+      description: you can choose one of the free tables
+      parameters:
+      - description: table number
+        in: query
+        name: num
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      summary: Order a table
+      tags:
+      - tables
+  /table/buy:
+    post:
+      consumes:
+      - application/json
+      description: you can buy any food
+      parameters:
+      - description: order info
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/postgres.PurchaseR'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.Purchase'
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      summary: Buy a product
+      tags:
+      - tables
+  /tables:
+    get:
+      consumes:
+      - application/json
+      description: shows all the free tables
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              items:
+                type: integer
+              type: array
+            type: array
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      summary: GetTables
+      tags:
+      - tables
+swagger: "2.0"

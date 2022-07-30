@@ -1,10 +1,15 @@
 package server
 
 import (
+	"database/sql"
 	"fmt"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"net/http"
+	"restaurant/postgres"
 	"strconv"
 
+	_ "restaurant/docs"
 	"restaurant/menu"
 	"restaurant/types"
 
@@ -28,9 +33,9 @@ type Repository interface {
 	DeleteFoodByName(foodID, cetegory string) error
 	// sunbula
 
-	GetTables() ([]int, error)
+	GetTables() ([]types.Table, error)
 	TakeTable(num int) (types.Table, bool, error)
-	Buy(purchase *types.Purchase) (int, error)
+	Buy(purchase postgres.PurchaseR) (int, error)
 
 	// ibrohimjon
 	First() ([]types.Food, error)
@@ -47,68 +52,110 @@ type Handler struct {
 	table types.Table
 }
 
+// Buy
+// @Summary      Buy a product
+// @Description  you can buy any food
+// @Tags         tables
+// @Accept       json
+// @Produce      json
+// @Param        request   body postgres.PurchaseR  true  "order info"
+// @Success      200 {object} types.Purchase
+// @Failure      400
+// @Failure      404
+// @Failure      500
+// @Router       /table/buy [post]
 func (h *Handler) Buy(c *gin.Context) {
-	var request types.Purchase
+	var request postgres.PurchaseR
 	if er := c.ShouldBindJSON(&request); er != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": er.Error(),
 		})
 		return
 	}
-	purchase := menu.NewPurchase(request.ClientID, request.FirstMealID, request.SecondMealID, request.DessertID, request.SaladID, request.BeverageID, request.Total)
-	sum, er := h.repo.Buy(purchase)
+	sum, er := h.repo.Buy(request)
 	if er != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": er.Error(),
 		})
+		return
 	}
-	c.JSON(500, gin.H{
-		"total sum": sum,
-	})
+	pch := menu.NewPurchase(request.TableID, request.FirstMealID, request.SecondMealID, request.DessertID, request.SaladID, request.BeverageID, sum)
+	c.JSON(500, pch)
 }
 
+// TakeTable
+// @Summary      Order a table
+// @Description  you can choose one of the free tables
+// @Tags         tables
+// @Accept       json
+// @Produce      json
+// @Param        num   query      int  true  "table number"
+// @Success      200
+// @Failure      400
+// @Failure      404
+// @Failure      500
+// @Router       /table [post]
 func (h *Handler) TakeTable(c *gin.Context) {
 	table := h.table
 	var er error
-	table.Number, er = strconv.Atoi(c.Query("num"))
+	var b bool
+	num := c.Query("num")
+	n, er := strconv.Atoi(num)
 	if er != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "please enter a number not string",
+		})
+		return
+	}
+	table, b, er = h.repo.TakeTable(n)
+	if er == sql.ErrNoRows && b {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			":(": fmt.Sprintf("we don't have table with № %d", n),
+		})
+		return
+	} else if er != nil && !b {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": er.Error(),
 		})
 		return
-	}
-	table, table.IsTaken, er = h.repo.TakeTable(table.Number)
-	if er != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": er.Error(),
+	} else if !b && er == nil {
+		c.JSON(http.StatusOK, gin.H{
+			":(": fmt.Sprintf("table with № %d is taken", table.Number),
 		})
 		return
-	} else if table.IsTaken && er == nil {
+	} else if er != nil && b {
 		c.JSON(http.StatusOK, gin.H{
-			":(": fmt.Sprintf("there is no table with № %d", table.Number),
-		})
-		return
-	}
-	if !table.IsTaken {
-		c.JSON(http.StatusOK, gin.H{
-			":)": fmt.Sprintf("your table's id is %s", table.ID),
+			":(": fmt.Sprintf("could not give you your table № %d", table.Number),
 		})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
-		":(": fmt.Sprintf("table № %d is taken", table.Number),
+		":)": fmt.Sprintf("your table's id is %s", table.ID),
 	})
+	return
+
 }
 
+// GetTables
+// @Summary      GetTables
+// @Description  shows all the free tables
+// @Tags         tables
+// @Accept       json
+// @Produce      json
+// @Success      200  {array}  []int
+// @Failure      400
+// @Failure      404
+// @Failure      500
+// @Router       /tables [get]
 func (h *Handler) GetTables(c *gin.Context) {
-	tableNumbers, er := h.repo.GetTables()
+	tables, er := h.repo.GetTables()
 	if er != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error": er.Error(),
 		})
 		return
 	}
-	c.JSON(http.StatusOK, tableNumbers)
+	c.JSON(http.StatusOK, tables)
 }
 
 func (h *Handler) First(c *gin.Context) {
@@ -441,31 +488,46 @@ func (h Handler) Sets(c *gin.Context) {
 	c.JSON(http.StatusOK, sets)
 }
 
+// NewRouter
+// @title           Swagger Restaurant API
+// @version         1.0
+// @description     This is a restaurant project.
+// @termsOfService  http://swagger.io/terms/
+
+// @contact.name   API Support
+// @contact.url    http://www.swagger.io/support
+// @contact.email  support@swagger.io
+
+// @license.name  Apache 2.0
+// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host      localhost:8080
+
 func NewRouter(repo Repository) *gin.Engine {
 	r := gin.Default()
 	h := Handler{repo: repo}
-	r.GET("/menu/first-meal", h.First)
-	r.GET("/menu/second-meal", h.Second)
-	r.GET("/menu/salad", h.Salad)
-	r.GET("/menu/dessert", h.Dessert)
-	r.GET("/menu/drinks", h.Drink)
+	r.GET("/menu/first-meal", h.First)   // done
+	r.GET("/menu/second-meal", h.Second) // done
+	r.GET("/menu/salad", h.Salad)        // done
+	r.GET("/menu/dessert", h.Dessert)    // done
+	r.GET("/menu/drinks", h.Drink)       // done
 
-	r.GET("/tables", h.GetTables)
-	r.POST("/table", h.TakeTable)
-	r.POST("/table/buy", h.Buy)
-
-	r.GET("/table/buy/budget/")
+	r.GET("/tables", h.GetTables) // done
+	r.POST("/table", h.TakeTable) // done
+	r.POST("/table/buy", h.Buy)   // done
 
 	// sunbula
-	r.GET("/menu", h.Menu)
-	r.POST("/add/food", h.AddFood)
-	r.GET("/food/", h.GetFood)
-	r.PUT("/update/food/", h.UpdateFood)
-	r.DELETE("/delete/food/", h.DeleteFood)
+	r.GET("/menu", h.Menu)                  // done
+	r.POST("/add/food", h.AddFood)          //
+	r.GET("/food/", h.GetFood)              //
+	r.PUT("/update/food/", h.UpdateFood)    //
+	r.DELETE("/delete/food/", h.DeleteFood) //
 	// sunbula
 
 	//doniyor
-	r.GET("/set", h.Sets)
+	r.GET("/set", h.Sets) // problem with query
+
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	return r
 }
