@@ -14,92 +14,98 @@ type PostgresRepository struct {
 	db *sql.DB
 }
 
+type PurchaseR struct {
+	TableID      string `json:"table_id,omitempty"`
+	FirstMealID  string `json:"first_meal_id,omitempty"`
+	SecondMealID string `json:"second_meal_id,omitempty"`
+	DessertID    string `json:"dessert_id,omitempty"`
+	SaladID      string `json:"salad_id,omitempty"`
+	BeverageID   string `json:"beverage_id,omitempty"`
+}
+
 func NewPostgresRepository(db *sql.DB) *PostgresRepository {
 	return &PostgresRepository{
 		db: db,
 	}
 }
 
-func (p PostgresRepository) Buy(purchase *types.Purchase) (int, error) {
-	price := 0
+func (p *PostgresRepository) Buy(purchase PurchaseR) (int, error) {
+	var total, price int
+	var row *sql.Row
 
-	row, er := p.db.Query("select price from first_meal where id = $1", purchase.FirstMealID)
-	if er != nil {
-		return 0, er
+	if purchase.FirstMealID != "" {
+		row := p.db.QueryRow("select price from first_meal where id = $1", purchase.FirstMealID)
+		if er := row.Scan(&price); er != nil {
+			return 0, er
+		}
+		total += price
 	}
-	if er = row.Scan(&price); er != nil {
-		return 0, er
-	}
-	purchase.Total += price
 
-	row, er = p.db.Query("select price from second_meal where id = $1", purchase.SecondMealID)
-	if er != nil {
-		return 0, er
+	if purchase.SecondMealID != "" {
+		row := p.db.QueryRow("select price from second_meal where id = $1", purchase.SecondMealID)
+		if er := row.Scan(&price); er != nil {
+			return 0, er
+		}
+		total += price
 	}
-	if er = row.Scan(&price); er != nil {
-		return 0, er
-	}
-	purchase.Total += price
 
-	row, er = p.db.Query("select price from beverage where id = $1", purchase.BeverageID)
-	if er != nil {
-		return 0, er
+	if purchase.BeverageID != "" {
+		row = p.db.QueryRow("select price from beverage where id = $1", purchase.BeverageID)
+		if er := row.Scan(&price); er != nil {
+			return 0, er
+		}
+		total += price
 	}
-	if er = row.Scan(&price); er != nil {
-		return 0, er
-	}
-	purchase.Total += price
 
-	row, er = p.db.Query("select price from salad where id = $1", purchase.SaladID)
-	if er != nil {
-		return 0, er
+	if purchase.SaladID != "" {
+		row = p.db.QueryRow("select price from salad where id = $1", purchase.SaladID)
+		if er := row.Scan(&price); er != nil {
+			return 0, er
+		}
+		total += price
 	}
-	if er = row.Scan(&price); er != nil {
-		return 0, er
-	}
-	purchase.Total += price
 
-	row, er = p.db.Query("select price from dessert where id = $1", purchase.DessertID)
-	if er != nil {
-		return 0, er
+	if purchase.DessertID != "" {
+		row = p.db.QueryRow("select price from dessert where id = $1", purchase.DessertID)
+		if er := row.Scan(&price); er != nil {
+			return 0, er
+		}
+		total += price
 	}
-	if er = row.Scan(&price); er != nil {
-		return 0, er
-	}
-	purchase.Total += price
-
-	return purchase.Total, nil
+	return total, nil
 }
 
 func (p *PostgresRepository) TakeTable(num int) (types.Table, bool, error) {
-	var t types.Table
-	row := p.db.QueryRow("select table_number, is_taken from tables where table_number = $1", num)
-	if er := row.Scan(&t.Number, &t.IsTaken); er != nil {
+	var table types.Table
+	row := p.db.QueryRow("select * from tables where table_number = $1", num)
+	if er := row.Scan(&table.ID, &table.Number, &table.IsTaken); er == sql.ErrNoRows {
+		return types.Table{}, true, er
+	} else if er != nil {
 		return types.Table{}, false, er
-	}
-	if t.Number != num {
-		return types.Table{}, true, nil
+	} else if table.IsTaken {
+		return table, false, nil
 	}
 	if _, er := p.db.Exec("update tables set is_taken=$1 where table_number=$2", true, num); er != nil {
 		return types.Table{}, true, er
 	}
-	return t, true, nil
+	return table, true, nil
 }
 
-func (p *PostgresRepository) GetTables() ([]int, error) {
-	rows, er := p.db.Query("select table_number from tables where is_taken = $1", false)
+func (p *PostgresRepository) GetTables() ([]types.Table, error) {
+	rows, er := p.db.Query("select * from tables where is_taken = $1", false)
 	if er != nil {
 		return nil, er
 	}
-	var tableNumbers []int
+	tables := []types.Table{}
+
 	for rows.Next() {
-		var num int
-		if er = rows.Scan(&num); er != nil {
+		table := types.Table{}
+		if er = rows.Scan(&table.ID, &table.Number, &table.IsTaken); er != nil {
 			return nil, er
 		}
-		tableNumbers = append(tableNumbers, num)
+		tables = append(tables, table)
 	}
-	return tableNumbers, nil
+	return tables, nil
 }
 
 //************************************************
@@ -113,17 +119,15 @@ func (ps *PostgresRepository) First() ([]types.Food, error) {
 
 	var foods []types.Food
 
-	rows, err := tx.Query(`SELECT name, ingredients, price, cooked_at FROM first_meal`)
+	rows, err := tx.Query(`SELECT id, name, ingredients, price, cooked_at FROM first_meal`)
 	if err != nil {
 		tx.Rollback()
 		return nil, err
 	}
 
 	for rows.Next() {
-		f := types.Food{
-			ID: "",
-		}
-		err := rows.Scan(&f.Name, &f.Ingredients, &f.Price, &f.CookedAt)
+		f := types.Food{}
+		err := rows.Scan(&f.ID, &f.Name, &f.Ingredients, &f.Price, &f.CookedAt)
 		if err != nil {
 			tx.Rollback()
 			return nil, err
@@ -143,17 +147,15 @@ func (ps *PostgresRepository) Second() ([]types.Food, error) {
 
 	var foods []types.Food
 
-	rows, err := tx.Query(`SELECT name, ingredients, price, cooked_at FROM second_meal`)
+	rows, err := tx.Query(`SELECT id, name, ingredients, price, cooked_at FROM second_meal`)
 	if err != nil {
 		tx.Rollback()
 		return nil, err
 	}
 
 	for rows.Next() {
-		f := types.Food{
-			ID: "",
-		}
-		err := rows.Scan(&f.Name, &f.Ingredients, &f.Price, &f.CookedAt)
+		f := types.Food{}
+		err := rows.Scan(&f.ID, &f.Name, &f.Ingredients, &f.Price, &f.CookedAt)
 		if err != nil {
 			tx.Rollback()
 			return nil, err
@@ -173,17 +175,15 @@ func (ps *PostgresRepository) Salad() ([]types.Food, error) {
 
 	var foods []types.Food
 
-	rows, err := tx.Query(`SELECT name, ingredients, price, cooked_at FROM salad`)
+	rows, err := tx.Query(`SELECT id, name, ingredients, price, cooked_at FROM salad`)
 	if err != nil {
 		tx.Rollback()
 		return nil, err
 	}
 
 	for rows.Next() {
-		f := types.Food{
-			ID: "",
-		}
-		err := rows.Scan(&f.Name, &f.Ingredients, &f.Price, &f.CookedAt)
+		f := types.Food{}
+		err := rows.Scan(&f.ID, &f.Name, &f.Ingredients, &f.Price, &f.CookedAt)
 		if err != nil {
 			tx.Rollback()
 			return nil, err
@@ -203,17 +203,15 @@ func (ps *PostgresRepository) Dessert() ([]types.Food, error) {
 
 	var foods []types.Food
 
-	rows, err := tx.Query(`SELECT name, ingredients, price, cooked_at FROM dessert`)
+	rows, err := tx.Query(`SELECT id, name, ingredients, price, cooked_at FROM dessert`)
 	if err != nil {
 		tx.Rollback()
 		return nil, err
 	}
 
 	for rows.Next() {
-		f := types.Food{
-			ID: "",
-		}
-		err := rows.Scan(&f.Name, &f.Ingredients, &f.Price, &f.CookedAt)
+		f := types.Food{}
+		err := rows.Scan(&f.ID, &f.Name, &f.Ingredients, &f.Price, &f.CookedAt)
 		if err != nil {
 			tx.Rollback()
 			return nil, err
@@ -233,17 +231,15 @@ func (ps *PostgresRepository) Drink() ([]types.Food, error) {
 
 	var foods []types.Food
 
-	rows, err := tx.Query(`SELECT name, ingredients, price, cooked_at FROM beverage`)
+	rows, err := tx.Query(`SELECT id, name, ingredients, price, cooked_at FROM beverage`)
 	if err != nil {
 		tx.Rollback()
 		return nil, err
 	}
 
 	for rows.Next() {
-		f := types.Food{
-			ID: "",
-		}
-		err := rows.Scan(&f.Name, &f.Ingredients, &f.Price, &f.CookedAt)
+		f := types.Food{}
+		err := rows.Scan(&f.ID, &f.Name, &f.Ingredients, &f.Price, &f.CookedAt)
 		if err != nil {
 			tx.Rollback()
 			return nil, err
@@ -824,7 +820,7 @@ func (ps *PostgresRepository) Sets(cash float64) ([][]types.Food, error) {
 	} else {
 		for firstmeal.Next() {
 			f := types.Food{}
-			if err := firstmeal.Scan(&f.ID, &f.Name, &f.Ingredients, &f.Price, &f.CookedAt); err != nil {
+			if err := firstmeal.Scan(&f.ID, &f.Name, &f.Ingredients, &f.Price, &f.Quantity, &f.CookedAt); err != nil {
 				tx.Rollback()
 				return nil, err
 			}
@@ -845,7 +841,7 @@ func (ps *PostgresRepository) Sets(cash float64) ([][]types.Food, error) {
 		} else {
 			for secondmeal.Next() {
 				f := types.Food{}
-				if err := secondmeal.Scan(&f.ID, &f.Name, &f.Ingredients, &f.Price, &f.CookedAt); err != nil {
+				if err := secondmeal.Scan(&f.ID, &f.Name, &f.Ingredients, &f.Price, &f.Quantity, &f.CookedAt); err != nil {
 					tx.Rollback()
 					return nil, err
 				}
@@ -868,7 +864,7 @@ desert:
 	} else {
 		for deserts.Next() {
 			f := types.Food{}
-			if err := deserts.Scan(&f.ID, &f.Name, &f.Ingredients, &f.Price, &f.CookedAt); err != nil {
+			if err := deserts.Scan(&f.ID, &f.Name, &f.Ingredients, &f.Price, &f.Quantity, &f.CookedAt); err != nil {
 				tx.Rollback()
 				return nil, err
 			}
@@ -891,7 +887,7 @@ desert:
 	} else {
 		for salads.Next() {
 			f := types.Food{}
-			if err := salads.Scan(&f.ID, &f.Name, &f.Ingredients, &f.Price, &f.CookedAt); err != nil {
+			if err := salads.Scan(&f.ID, &f.Name, &f.Ingredients, &f.Price, &f.Quantity, &f.CookedAt); err != nil {
 				tx.Rollback()
 				return nil, err
 			}

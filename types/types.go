@@ -13,16 +13,15 @@ type Food struct {
 }
 
 const (
-	FirstMeal = "first_meal"
+	FirstMeal  = "first_meal"
 	SecondMeal = "second_meal"
-	Dessert = "dessert"
-	Salad = "salad"
-	Beverage = "beverage"
+	Dessert    = "dessert"
+	Salad      = "salad"
+	Beverage   = "beverage"
 )
 
-
 type Purchase struct {
-	ClientID     string    `json:"client_id,omitempty"`
+	TableID      string    `json:"table_id,omitempty"`
 	FirstMealID  string    `json:"first_meal_id,omitempty"`
 	SecondMealID string    `json:"second_meal_id,omitempty"`
 	DessertID    string    `json:"dessert_id,omitempty"`
