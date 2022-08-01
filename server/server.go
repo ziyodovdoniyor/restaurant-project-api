@@ -262,13 +262,13 @@ func (h *Handler) Drink(c *gin.Context) {
 	c.JSON(http.StatusOK, drink)
 }
 
-
+// Menu
 // @Summary      Menu
 // @Description  shows all items in the menu
 // @Tags         sunbula
 // @Produce      json
 // @Success      200  {array}  []types.Food
-// @Failure      500   
+// @Failure      500
 // @Router       /menu [GET]
 func (h *Handler) Menu(c *gin.Context) {
 	data, err := h.repo.Menu()
@@ -285,14 +285,15 @@ func (h *Handler) Menu(c *gin.Context) {
 	c.JSON(http.StatusOK, data)
 }
 
+// AddFood
 // @Summary      Add food
 // @Description  Add food to the menu, food name must be unique
 // @Tags         sunbula
 // @Accept       json
 // @Param        request body types.PreEnterFood  true  "Food info"
-// @Success      200  
-// @Failure      400     
-// @Failure      500     
+// @Success      200
+// @Failure      400
+// @Failure      500
 // @Router       /add/food [POST]
 func (h *Handler) AddFood(c *gin.Context) {
 	var food types.PreEnterFood
@@ -319,16 +320,17 @@ func (h *Handler) AddFood(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
+// UpdateFood
 // @Summary      Update food
 // @Description  Update food in the menu
 // @Tags         sunbula
 // @Accept       json
-// @Param        name    query     string  true  "update food by name" 
+// @Param        name    query     string  true  "update food by name"
 // @Param        request body types.UpdateFood true "Food info"
-// @Success      200  
-// @Failure      400 
-// @Failure 	 404    
-// @Failure      500     
+// @Success      200
+// @Failure      400
+// @Failure 	 404
+// @Failure      500
 // @Router       /update/food/ [PUT]
 func (h *Handler) UpdateFood(c *gin.Context) {
 	foodName, ok := c.GetQuery("name")
@@ -365,7 +367,7 @@ func (h *Handler) UpdateFood(c *gin.Context) {
 				message := fmt.Sprintf("couldn't update item %v", err)
 				c.String(http.StatusInternalServerError, message)
 				return
-			}	
+			}
 		}
 	}
 	if category == types.FirstMeal {
@@ -379,7 +381,7 @@ func (h *Handler) UpdateFood(c *gin.Context) {
 				message := fmt.Sprintf("couldn't update item %v", err)
 				c.String(http.StatusInternalServerError, message)
 				return
-			}	
+			}
 		}
 	}
 	if category == types.Salad {
@@ -393,7 +395,7 @@ func (h *Handler) UpdateFood(c *gin.Context) {
 				message := fmt.Sprintf("couldn't update item %v", err)
 				c.String(http.StatusInternalServerError, message)
 				return
-			}	
+			}
 		}
 	}
 	if category == types.Dessert {
@@ -407,7 +409,7 @@ func (h *Handler) UpdateFood(c *gin.Context) {
 				message := fmt.Sprintf("couldn't update item %v", err)
 				c.String(http.StatusInternalServerError, message)
 				return
-			}	
+			}
 		}
 	}
 	if category == types.Beverage {
@@ -421,7 +423,7 @@ func (h *Handler) UpdateFood(c *gin.Context) {
 				message := fmt.Sprintf("couldn't update item %v", err)
 				c.String(http.StatusInternalServerError, message)
 				return
-			}	
+			}
 		}
 	}
 
@@ -429,16 +431,16 @@ func (h *Handler) UpdateFood(c *gin.Context) {
 	c.String(http.StatusOK, message)
 }
 
-
+// GetFood
 // @Summary      Get food
 // @Description  it gets all information about the asked food
 // @Tags         sunbula
 // @Accept       json
-// @Param        name    query     string  true  "search food by name"  
+// @Param        name    query     string  true  "search food by name"
 // @Success      200  {object} types.Food
-// @Failure      400 
-// @Failure 	 404    
-// @Failure      500     
+// @Failure      400
+// @Failure 	 404
+// @Failure      500
 // @Router       /food/ [GET]
 func (h *Handler) GetFood(c *gin.Context) {
 	foodName, ok := c.GetQuery("name")
@@ -480,16 +482,16 @@ func (h *Handler) GetFood(c *gin.Context) {
 
 }
 
-
+// DeleteFood
 // @Summary      Delete food
 // @Description  deletes food by its name
 // @Tags         sunbula
 // @Accept       json
-// @Param        name    query     string  true  "delete food by name"  
-// @Success      200  
-// @Failure      400 
-// @Failure 	 404    
-// @Failure      500     
+// @Param        name    query     string  true  "delete food by name"
+// @Success      200
+// @Failure      400
+// @Failure 	 404
+// @Failure      500
 // @Router       /delete/food/ [DELETE]
 func (h *Handler) DeleteFood(c *gin.Context) {
 	foodName, ok := c.GetQuery("name")
@@ -535,7 +537,7 @@ func (h *Handler) DeleteFood(c *gin.Context) {
 			)
 			return
 		}
-		
+
 	}
 
 	c.String(http.StatusOK, "successfully deleted")
@@ -571,5 +573,3 @@ func (h Handler) Sets(c *gin.Context) {
 
 	c.JSON(http.StatusOK, sets)
 }
-
-
