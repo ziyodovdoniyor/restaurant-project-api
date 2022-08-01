@@ -202,6 +202,16 @@ func (h *Handler) GetTables(c *gin.Context) {
 	c.JSON(http.StatusOK, tables)
 }
 
+//First
+// @Summary      List-first-meals
+// @Description  shows list first meal
+// @Tags         meals
+// @Accept		 json
+// @Produce      json
+// @Success      200 {object} FoodList
+// @Failure      400
+// @Failure      500
+// @Router       /menu/first-meal [GET]
 func (h *Handler) First(c *gin.Context) {
 	firstFoods, err := h.repo.First()
 	if err != nil {
@@ -214,6 +224,16 @@ func (h *Handler) First(c *gin.Context) {
 	c.JSON(http.StatusOK, firstFoods)
 }
 
+//Second
+// @Summary      List-second-meals
+// @Description  shows list second meal
+// @Tags         meals
+// @Accept		 json
+// @Produce      json
+// @Success      200 {object} FoodList
+// @Failure      400
+// @Failure      500
+// @Router       /menu/second-meal [GET]
 func (h *Handler) Second(c *gin.Context) {
 	secondFoods, err := h.repo.Second()
 	if err != nil {
@@ -226,6 +246,16 @@ func (h *Handler) Second(c *gin.Context) {
 	c.JSON(http.StatusOK, secondFoods)
 }
 
+//Salad
+// @Summary      List-salad
+// @Description  shows list salad
+// @Tags         meals
+// @Accept		 json
+// @Produce      json
+// @Success      200 {object} FoodList
+// @Failure      400
+// @Failure      500
+// @Router       /menu/salad [GET]
 func (h *Handler) Salad(c *gin.Context) {
 	salad, err := h.repo.Salad()
 	if err != nil {
@@ -238,6 +268,16 @@ func (h *Handler) Salad(c *gin.Context) {
 	c.JSON(http.StatusOK, salad)
 }
 
+//Dessert
+// @Summary      List-dessert
+// @Description  shows list dessert
+// @Tags         meals
+// @Accept		 json
+// @Produce      json
+// @Success      200 {object} FoodList
+// @Failure      400
+// @Failure      500
+// @Router       /menu/dessert [GET]
 func (h *Handler) Dessert(c *gin.Context) {
 	dessert, err := h.repo.Dessert()
 	if err != nil {
@@ -250,6 +290,16 @@ func (h *Handler) Dessert(c *gin.Context) {
 	c.JSON(http.StatusOK, dessert)
 }
 
+//Drink
+// @Summary      List-drink
+// @Description  shows list drink
+// @Tags         meals
+// @Accept		 json
+// @Produce      json
+// @Success      200 {object} FoodList
+// @Failure      400
+// @Failure      500
+// @Router       /menu/drinks [GET]
 func (h *Handler) Drink(c *gin.Context) {
 	drink, err := h.repo.Drink()
 	if err != nil {
