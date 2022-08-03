@@ -202,14 +202,14 @@ func (h *Handler) GetTables(c *gin.Context) {
 	c.JSON(http.StatusOK, tables)
 }
 
-//First
-// @Summary      List-first-meals
-// @Description  shows list first meal
+// First
+// @Summary      first meals
+// @Description  it gets first meal information
 // @Tags         meals
-// @Accept		 json
-// @Produce      json
-// @Success      200 {object} FoodList
+// @Accept       json
+// @Success      200  {object} []types.Food
 // @Failure      400
+// @Failure 	 404
 // @Failure      500
 // @Router       /menu/first-meal [GET]
 func (h *Handler) First(c *gin.Context) {
@@ -224,14 +224,14 @@ func (h *Handler) First(c *gin.Context) {
 	c.JSON(http.StatusOK, firstFoods)
 }
 
-//Second
-// @Summary      List-second-meals
-// @Description  shows list second meal
+// Second
+// @Summary      second meals
+// @Description  it gets second meal information
 // @Tags         meals
-// @Accept		 json
-// @Produce      json
-// @Success      200 {object} FoodList
+// @Accept       json
+// @Success      200  {object} []types.Food
 // @Failure      400
+// @Failure 	 404
 // @Failure      500
 // @Router       /menu/second-meal [GET]
 func (h *Handler) Second(c *gin.Context) {
@@ -246,14 +246,14 @@ func (h *Handler) Second(c *gin.Context) {
 	c.JSON(http.StatusOK, secondFoods)
 }
 
-//Salad
-// @Summary      List-salad
-// @Description  shows list salad
+// Salad
+// @Summary      salads
+// @Description  it gets salad information
 // @Tags         meals
-// @Accept		 json
-// @Produce      json
-// @Success      200 {object} FoodList
+// @Accept       json
+// @Success      200  {object} []types.Food
 // @Failure      400
+// @Failure 	 404
 // @Failure      500
 // @Router       /menu/salad [GET]
 func (h *Handler) Salad(c *gin.Context) {
@@ -268,14 +268,14 @@ func (h *Handler) Salad(c *gin.Context) {
 	c.JSON(http.StatusOK, salad)
 }
 
-//Dessert
-// @Summary      List-dessert
-// @Description  shows list dessert
+// Dessert
+// @Summary      dessert
+// @Description  it gets dessert information
 // @Tags         meals
-// @Accept		 json
-// @Produce      json
-// @Success      200 {object} FoodList
+// @Accept       json
+// @Success      200  {object} []types.Food
 // @Failure      400
+// @Failure 	 404
 // @Failure      500
 // @Router       /menu/dessert [GET]
 func (h *Handler) Dessert(c *gin.Context) {
@@ -290,14 +290,14 @@ func (h *Handler) Dessert(c *gin.Context) {
 	c.JSON(http.StatusOK, dessert)
 }
 
-//Drink
-// @Summary      List-drink
-// @Description  shows list drink
+// Drink
+// @Summary      drink
+// @Description  it gets drink information
 // @Tags         meals
-// @Accept		 json
-// @Produce      json
-// @Success      200 {object} FoodList
+// @Accept       json
+// @Success      200  {object} []types.Food
 // @Failure      400
+// @Failure 	 404
 // @Failure      500
 // @Router       /menu/drinks [GET]
 func (h *Handler) Drink(c *gin.Context) {
