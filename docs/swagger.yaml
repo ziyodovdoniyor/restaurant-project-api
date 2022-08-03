@@ -177,6 +177,111 @@ paths:
       summary: Menu
       tags:
       - sunbula
+  /menu/dessert:
+    get:
+      consumes:
+      - application/json
+      description: it gets dessert information
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/types.Food'
+            type: array
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      summary: dessert
+      tags:
+      - meals
+  /menu/drink:
+    get:
+      consumes:
+      - application/json
+      description: it gets drink information
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/types.Food'
+            type: array
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      summary: drink
+      tags:
+      - meals
+  /menu/first-meal:
+    get:
+      consumes:
+      - application/json
+      description: it gets first meal information
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/types.Food'
+            type: array
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      summary: first meals
+      tags:
+      - meals
+  /menu/salad:
+    get:
+      consumes:
+      - application/json
+      description: it gets salad information
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/types.Food'
+            type: array
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      summary: salads
+      tags:
+      - meals
+  /menu/second-meal:
+    get:
+      consumes:
+      - application/json
+      description: it gets second meal information
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/types.Food'
+            type: array
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      summary: second meals
+      tags:
+      - meals
   /table:
     post:
       consumes:
